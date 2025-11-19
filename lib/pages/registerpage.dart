@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jagamata/services/api_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -8,13 +9,38 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // Controller untuk ambil nilai dari TextField
   final TextEditingController emailController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  // Key untuk validasi form
   final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
+
+  void handleRegister() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+
+    final result = await ApiService.register(
+      email: emailController.text.trim(),
+      username: usernameController.text.trim(),
+      password: passwordController.text.trim(),
+    );
+
+    setState(() => isLoading = false);
+
+    if (result['success']) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Registrasi berhasil! Silakan login.")),
+      );
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pushReplacementNamed(context, '/login');
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['message'] ?? "Registrasi gagal!")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,23 +142,10 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                             elevation: 4,
                           ),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              // kirim data email & password ke LoginPage
-                              Navigator.pushReplacementNamed(
-                                context,
-                                '/login',
-                                arguments: {
-                                  'email': emailController.text.trim(),
-                                  'password': passwordController.text.trim(),
-                                },
-                              );
-                            }
-                          },
-
-                          child: const Text(
-                            "SIGNUP",
-                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          onPressed: isLoading ? null : handleRegister,
+                          child: Text(
+                            isLoading ? "LOADING..." : "SIGNUP",
+                            style: const TextStyle(fontSize: 16, color: Colors.white),
                           ),
                         ),
                       ),
@@ -142,7 +155,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           Navigator.pushReplacementNamed(context, '/login');
                         },
                         child: const Text(
-                          "LOGIN",
+                          "SUDAH PUNYA AKUN? LOGIN",
                           style: TextStyle(
                             color: Color(0xFF4A77A1),
                             fontWeight: FontWeight.bold,
