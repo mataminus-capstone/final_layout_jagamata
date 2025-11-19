@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jagamata/services/api_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -8,34 +9,28 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
 
-  String? registeredEmail;
-  String? registeredPassword;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args = ModalRoute.of(context)!.settings.arguments as Map?;
-    if (args != null) {
-      registeredEmail = args['email'];
-      registeredPassword = args['password'];
-    }
-  }
-
-  void handleLogin() {
-    String email = emailController.text.trim();
+  void handleLogin() async {
+    String username = usernameController.text.trim();
     String password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Isi email dan password terlebih dahulu!")),
+        const SnackBar(content: Text("Isi username dan password terlebih dahulu!")),
       );
       return;
     }
 
-    if (email == registeredEmail && password == registeredPassword) {
+    setState(() => isLoading = true);
+
+    final result = await ApiService.login(username: username, password: password);
+
+    setState(() => isLoading = false);
+
+    if (result['success']) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Login berhasil!")),
       );
@@ -44,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email atau password salah!")),
+        SnackBar(content: Text(result['message'] ?? "Login gagal!")),
       );
     }
   }
@@ -85,10 +80,10 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   children: [
                     TextField(
-                      controller: emailController,
+                      controller: usernameController,
                       decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.email_outlined),
-                        labelText: 'Email',
+                        prefixIcon: const Icon(Icons.person_outlined),
+                        labelText: 'Username',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -118,10 +113,23 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           elevation: 4,
                         ),
-                        onPressed: handleLogin,
+                        onPressed: isLoading ? null : handleLogin,
                         child: Text(
-                          "LOGIN",
-                          style: TextStyle(fontSize: 16, color: Colors.white),
+                          isLoading ? "LOADING..." : "LOGIN",
+                          style: const TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacementNamed(context, '/register');
+                      },
+                      child: const Text(
+                        "BELUM PUNYA AKUN? DAFTAR SEKARANG",
+                        style: TextStyle(
+                          color: Color(0xFF4A77A1),
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -130,7 +138,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ],
           ),
-          
         ),
       ),
     );

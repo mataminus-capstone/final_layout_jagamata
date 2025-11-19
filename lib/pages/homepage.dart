@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:jagamata/services/api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class Homopage extends StatelessWidget {
+class Homopage extends StatefulWidget {
   const Homopage({super.key});
 
-  // Data dummy fitur
+  @override
+  State<Homopage> createState() => _HomopageState();
+}
+
+class _HomopageState extends State<Homopage> {
+  List<Map<String, String>> artikelList = [];
+  bool isLoading = true;
+
   final List<Map<String, String>> fiturList = const [
     {
       'title': 'Deteksi',
@@ -30,31 +36,21 @@ class Homopage extends StatelessWidget {
     },
   ];
 
-  // List artikel (dummy data)
-  final List<Map<String, String>> artikelList = const [
-    {
-      'judul': 'Menjaga Kesehatan Mata di Era Digital',
-      'gambar': 'images/maskot.png',
-      'ringkasan':
-          'Pelajari cara menjaga mata tetap sehat meski sering menatap layar...',
-      'url':
-          'https://rsud.bulelengkab.go.id/informasi/detail/artikel/artikel-kesehatan-mata-penjelasan-lengkap-secara-umu-12',
-    },
-    {
-      'judul': 'Tips Relaksasi Mata Setelah Bekerja Lama',
-      'gambar': 'images/maskot.png',
-      'ringkasan':
-          'Beberapa teknik sederhana untuk merilekskan mata Anda setiap hari...',
-      'url': 'https://example.com/artikel2',
-    },
-    {
-      'judul': 'Pola Makan untuk Kesehatan Mata',
-      'gambar': 'images/maskot.png',
-      'ringkasan':
-          'Nutrisi apa saja yang penting untuk menjaga penglihatan tetap tajam...',
-      'url': 'https://example.com/artikel3',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchArticles();
+  }
+
+  void fetchArticles() async {
+    final result = await ApiService.getArticles();
+    setState(() {
+      if (result['success']) {
+        artikelList = List<Map<String, String>>.from(result['data']);
+      }
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +62,6 @@ class Homopage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -106,10 +101,9 @@ class Homopage extends StatelessWidget {
               ),
               SizedBox(height: 16),
 
-              // Banner
               Container(
                 height: 180,
-                padding: EdgeInsets.all(16), // jarak dari tepi container
+                padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -160,7 +154,6 @@ class Homopage extends StatelessWidget {
               ),
               SizedBox(height: 16),
 
-              // Pencarian
               TextField(
                 decoration: InputDecoration(
                   hintText: 'Cari',
@@ -172,7 +165,6 @@ class Homopage extends StatelessWidget {
               ),
               SizedBox(height: 16),
 
-              // Grid kecil (2x2)
               GridView.builder(
                 itemCount: fiturList.length,
                 shrinkWrap: true,
@@ -187,7 +179,6 @@ class Homopage extends StatelessWidget {
                   final item = fiturList[index];
                   return GestureDetector(
                     onTap: () {
-                      // ambil title-nya, dan arahkan ke route sesuai
                       switch (item['title']) {
                         case 'Deteksi':
                           Navigator.pushNamed(context, '/deteksi');
@@ -250,7 +241,6 @@ class Homopage extends StatelessWidget {
 
               SizedBox(height: 16),
 
-              // Label Artikel
               Text(
                 'Artikel',
                 style: TextStyle(
@@ -260,86 +250,87 @@ class Homopage extends StatelessWidget {
               ),
               SizedBox(height: 8),
 
-              // Kotak artikel (2 kotak besar)
-              Column(
-                children: List.generate(
-                  3, // hanya tampilkan 3 artikel pertama
-                  (index) {
-                    final artikel = artikelList[index];
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 12),
-                      padding: EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 4,
-                            offset: Offset(1, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          // Gambar artikel
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.asset(
-                              artikel['gambar']!,
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
+              if (isLoading)
+                Center(child: CircularProgressIndicator())
+              else
+                Column(
+                  children: List.generate(
+                    artikelList.length > 3 ? 3 : artikelList.length,
+                    (index) {
+                      final artikel = artikelList[index];
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 12),
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 4,
+                              offset: Offset(1, 2),
                             ),
-                          ),
-                          SizedBox(width: 12),
-
-                          // Teks artikel
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  artikel['judul']!,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  artikel['ringkasan']!,
-                                  style: TextStyle(
-                                    color: Colors.black54,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                GestureDetector(
-                                  onTap: () {
-                                    // buka url artikel
-                                    launchUrl(Uri.parse(artikel['url']!));
-                                  },
-                                  child: Text(
-                                    'Baca selengkapnya...',
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                artikel['gambar']!,
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    artikel['judul']!,
                                     style: TextStyle(
-                                      color: Color(0xFF2F6F7E),
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black87,
                                     ),
                                   ),
-                                ),
-                              ],
+                                  SizedBox(height: 4),
+                                  Text(
+                                    artikel['ringkasan']!,
+                                    style: TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  GestureDetector(
+                                    onTap: () {
+                                      if (artikel.containsKey('url')) {
+                                        launchUrl(Uri.parse(artikel['url']!));
+                                      }
+                                    },
+                                    child: Text(
+                                      'Baca selengkapnya...',
+                                      style: TextStyle(
+                                        color: Color(0xFF2F6F7E),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
+
               SizedBox(height: 15),
-              
+
               Align(
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
