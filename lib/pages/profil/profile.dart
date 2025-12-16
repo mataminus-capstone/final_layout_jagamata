@@ -20,7 +20,7 @@ class _ProfilState extends State<Profil> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+     
       appBar: AppBar(
         title: Row(
           children: [
@@ -32,7 +32,7 @@ class _ProfilState extends State<Profil> {
                 ),
               ),
             ),
-            GestureDetector(
+            InkWell(
               onTap: () {
                 Navigator.pushNamed(context, '/setting');
               },
@@ -42,10 +42,14 @@ class _ProfilState extends State<Profil> {
         ),
       ),
       body: SingleChildScrollView(
-        child: Container(
+        
+        child:
+         Container(
+          color: Colors.white70,
           child: Center(
             child: Column(
               children: [
+                
                 // Foto profil
                 SizedBox(height: 20),
                 Stack(
@@ -82,14 +86,14 @@ class _ProfilState extends State<Profil> {
                   padding: EdgeInsets.all(20),
                   margin: EdgeInsets.only(top: 40, bottom: 20),
                   width: 400,
+                  
                   decoration: BoxDecoration(
-                    color: Color(0xFF80AFCC),
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(-10, 10),
+                        color:Colors.black12,
+                        blurRadius: 3,
+
                       ),
                     ],
                   ),
@@ -251,6 +255,7 @@ class _ProfilState extends State<Profil> {
                           ],
                         ),
                       ),
+                  
                     ],
                   ),
                 ),
@@ -262,13 +267,13 @@ class _ProfilState extends State<Profil> {
                   margin: EdgeInsets.symmetric(vertical: 20),
                   width: 400,
                   decoration: BoxDecoration(
-                    color: Color(0xFF80AFCC),
+                    
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(-10, 10),
+                        color: Colors.black12,
+                        blurRadius: 2,
+                       
                       ),
                     ],
                   ),
@@ -292,7 +297,7 @@ class _ProfilState extends State<Profil> {
                             ),
                             hintText: '*',
                             hintStyle: TextStyle(color: Colors.grey),
-                            suffixIcon: GestureDetector(
+                            suffixIcon: InkWell(
                               onTap: () {
                                 showDialog(
                                   context: context,

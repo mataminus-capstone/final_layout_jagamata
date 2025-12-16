@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:jagamata/pages/PERCOBAAN/COBA.dart';
 import 'package:jagamata/pages/artikel/artikel.dart';
 import 'package:jagamata/pages/chatbot/chatbot.dart';
 import 'package:jagamata/pages/daftar.dart';
 import 'package:jagamata/pages/deteksi/deteksi.dart';
 import 'package:jagamata/pages/homepage.dart';
 import 'package:jagamata/pages/loginpage.dart';
+import 'package:jagamata/pages/profil/profil1.dart';
 import 'package:jagamata/pages/profil/profile.dart';
 import 'package:jagamata/pages/profil/setting.dart';
 import 'package:jagamata/pages/registerpage.dart';
@@ -38,6 +40,8 @@ class JagaMata extends StatelessWidget {
         '/setting' : (context) => Setting(),
         '/artikel' : (context) => Artikel(),
         '/daftar' : (context) => Daftar(),
+        '/eyeExercise' : (context) => Coba(),
+        '/profil1' : (context) => Profil1(),
       },
     );
   }

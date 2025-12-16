@@ -14,45 +14,43 @@ class _DeteksiState extends State<Deteksi> {
       appBar: AppBar(
         title: Text(
           'Deteksi',
-          style: TextStyle(color: Color(0xFF4A77A1), fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Color(0xFF4A77A1),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: Container(
-        width: double.infinity,
-        // decoration: BoxDecoration(
-        //   gradient: LinearGradient(
-        //     colors: [?Colors.blue[50], Colors.white],
-        //     begin: AlignmentGeometry.topRight,
-        //     end: AlignmentGeometry.bottomLeft
-        //   ),
-        // ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.qr_code_scanner, size: 100, color: Colors.blue[600]),
-              SizedBox(height: 20),
-              Text(
-                "Pilih Mode Pemindaian",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.blue[900],
-                ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.qr_code_scanner, size: 100, color: Colors.blue[600]),
+            SizedBox(height: 20),
+            Text(
+              "Pindai Kondisi Mata Anda",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.blue[900],
               ),
-              SizedBox(height: 10),
-              Text(
-                "Gunakan kamera atau unggah foto dari galeri",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-              ),
-              SizedBox(height: 40),
-          
-              // Tombol Camera
-              Container(
-                width: 220,
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Gunakan kamera atau unggah foto untuk memulai analisis mata.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+            ),
+            SizedBox(height: 40),
+
+            // Tombol Camera
+            InkWell(
+              onTap: () {
+                // Aksi ketika tombol ditekan
+              },
+              child: Container(
+                width: 300,
                 padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                 decoration: BoxDecoration(
                   color: Color(0xFF80AFCC),
@@ -67,6 +65,7 @@ class _DeteksiState extends State<Deteksi> {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.camera_alt_outlined,
@@ -75,7 +74,7 @@ class _DeteksiState extends State<Deteksi> {
                     ),
                     SizedBox(width: 15),
                     Text(
-                      "Kamera",
+                      "Scan dengan Kamera",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -85,12 +84,40 @@ class _DeteksiState extends State<Deteksi> {
                   ],
                 ),
               ),
-          
-              SizedBox(height: 25),
-          
-              // Tombol Unggah Foto
-              Container(
-                width: 220,
+            ),
+
+            SizedBox(height: 25),
+
+            // space
+            Container(
+              width: 250,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Divider(thickness: 1, color: Colors.grey[400]),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      "atau",
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ),
+                  Expanded(
+                    child: Divider(thickness: 1, color: Colors.grey[400]),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 25),
+
+            // Tombol Unggah Foto
+            InkWell(
+              onTap: () {
+                // Aksi ketika tombol ditekan
+              },
+              child: Container(
+                width: 300,
                 padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                 decoration: BoxDecoration(
                   color: Color(0xFF80AFCC),
@@ -105,6 +132,7 @@ class _DeteksiState extends State<Deteksi> {
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.image_search_outlined,
@@ -113,7 +141,7 @@ class _DeteksiState extends State<Deteksi> {
                     ),
                     SizedBox(width: 15),
                     Text(
-                      "Unggah Foto",
+                      "Unggah Gambar",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -123,11 +151,22 @@ class _DeteksiState extends State<Deteksi> {
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+            SizedBox(height: 30),
+            // space
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.lock_outline, size: 20, color: Colors.green[400]), SizedBox(width: 8),
+                Text(
+                  "Data Anda aman, tidak tersimpan",
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
-
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jagamata/pages/PERCOBAAN/card.dart';
 
 class Rekomendasi extends StatelessWidget {
   const Rekomendasi({super.key});
@@ -15,9 +16,10 @@ class Rekomendasi extends StatelessWidget {
         elevation: 0,
       ),
       body: Center(
+        
         child: Column(
           children: [
-            Column(
+          Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Text('Rekomendasi Untuk Anda', style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold ),),
@@ -41,12 +43,20 @@ class Rekomendasi extends StatelessWidget {
             ListTile(onTap: () {
               Navigator.pushNamed(context, '/klinik');
             },
-            title:  Column(
+            title: Row(  
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("KLinik Mata", style: TextStyle(fontSize: 18, color: Colors.blue[900], fontWeight: FontWeight.bold)), 
-                SizedBox(height:10,),
-                Text("Ada beberapa rekomendasi klinik yang dapat menanganin masalah penyakit mata."),
+                Icon(Icons.local_hospital, color: Colors.blue[900],), SizedBox(width: 10,),
+                Expanded(
+                  child: Column(
+                    
+                    children: [
+                      Text("KLinik Mata", style: TextStyle(fontSize: 18, color: Colors.blue[900], fontWeight: FontWeight.bold)), 
+                      SizedBox(height:10,),
+                      Text("Ada beberapa rekomendasi klinik yang dapat menanganin masalah penyakit mata."),
+                    ],
+                  ),
+                ),
               ],
             ),
           
@@ -65,20 +75,37 @@ class Rekomendasi extends StatelessWidget {
             ListTile(onTap: () {
               
             },
-            title:  Column(
+            title:  Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Obat Mata", style: TextStyle(fontSize: 18, color: Colors.blue[900], fontWeight: FontWeight.bold)), 
-                SizedBox(height:10,),
-                Text("Ada beberapa rekomendasi obat terkait permasalahan mata ringan"),
+                Icon( Icons.medication_liquid, color: Colors.blue[900],), SizedBox(width: 10,),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text("Obat Mata", style: TextStyle(fontSize: 18, color: Colors.blue[900], fontWeight: FontWeight.bold)), 
+                      SizedBox(height:10,),
+                      Text("Ada beberapa rekomendasi obat terkait permasalahan mata ringan"),
+                    ],
+                  ),
+                ),
               ],
             ),
           
             ),
           )
-          ],
           
+         , PressableCard(
+            icon: Icons.remove_red_eye_outlined,
+            title: "Senam Mata",
+            description: "Rangkaian latihan gerakan untuk melatih otot di area mata.",
+            onTap: () {
+              Navigator.pushNamed(context, '/eyeExercise');
+            },
+          ),
+          
+          ],
         ),
+        
       ),
     );
   }

@@ -75,14 +75,14 @@ class _HomopageState extends State<Homopage> {
                   ),
                   Row(
                     children: [
-                      GestureDetector(
+                      InkWell(
                         onTap: () {
                           Navigator.pushNamed(context, '/notif');
                         },
                         child: Icon(Icons.notifications, color: Colors.black54),
                       ),
                       SizedBox(width: 16),
-                      GestureDetector(
+                      InkWell(
                         onTap: () {
                           Navigator.pushNamed(context, '/profil');
                         },
@@ -177,7 +177,7 @@ class _HomopageState extends State<Homopage> {
                 ),
                 itemBuilder: (context, index) {
                   final item = fiturList[index];
-                  return GestureDetector(
+                  return InkWell(
                     onTap: () {
                       switch (item['title']) {
                         case 'Deteksi':
@@ -305,7 +305,7 @@ class _HomopageState extends State<Homopage> {
                                     ),
                                   ),
                                   SizedBox(height: 4),
-                                  GestureDetector(
+                                  InkWell(
                                     onTap: () {
                                       if (artikel.containsKey('url')) {
                                         launchUrl(Uri.parse(artikel['url']!));
