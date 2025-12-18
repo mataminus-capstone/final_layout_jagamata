@@ -1,4 +1,4 @@
-package com.example.jagamata
+package app.jagamata.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

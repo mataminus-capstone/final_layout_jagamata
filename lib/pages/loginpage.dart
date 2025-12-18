@@ -11,9 +11,12 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   bool isLoading = false;
 
   void handleLogin() async {
+    FocusScope.of(context).unfocus(); // 🔥 tutup keyboard
+
     String username = usernameController.text.trim();
     String password = passwordController.text.trim();
 
@@ -26,7 +29,10 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => isLoading = true);
 
-    final result = await ApiService.login(username: username, password: password);
+    final result = await ApiService.login(
+      username: username,
+      password: password,
+    );
 
     setState(() => isLoading = false);
 
@@ -34,7 +40,8 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Login berhasil!")),
       );
-      Future.delayed(const Duration(seconds: 1), () {
+
+      Future.delayed(const Duration(milliseconds: 800), () {
         Navigator.pushReplacementNamed(context, '/home');
       });
     } else {
@@ -45,98 +52,109 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
+  void dispose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset('images/maskot.png', height: 250),
-              const SizedBox(height: 10),
-              const Text(
-                'LOGIN',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF4A77A1),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        body: Center(
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset('images/maskot.png', height: 250),
+                const SizedBox(height: 10),
+                const Text(
+                  'LOGIN',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF4A77A1),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: usernameController,
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.person_outlined),
-                        labelText: 'Username',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: passwordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        labelText: 'Password',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4A77A1),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: usernameController,
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.person_outlined),
+                          labelText: 'Username',
+                          border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          elevation: 4,
-                        ),
-                        onPressed: isLoading ? null : handleLogin,
-                        child: Text(
-                          isLoading ? "LOADING..." : "LOGIN",
-                          style: const TextStyle(fontSize: 16, color: Colors.white),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacementNamed(context, '/register');
-                      },
-                      child: const Text(
-                        "BELUM PUNYA AKUN? DAFTAR SEKARANG",
-                        style: TextStyle(
-                          color: Color(0xFF4A77A1),
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          labelText: 'Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : handleLogin,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF4A77A1),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: Text(
+                            isLoading ? "LOADING..." : "LOGIN",
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacementNamed(context, '/register');
+                        },
+                        child: const Text(
+                          "BELUM PUNYA AKUN? DAFTAR SEKARANG",
+                          style: TextStyle(
+                            color: Color(0xFF4A77A1),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

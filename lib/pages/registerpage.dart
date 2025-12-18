@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jagamata/services/api_service.dart';
+import 'package:jagamata/services/google_auth_service.dart';
+
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -145,10 +147,54 @@ class _RegisterPageState extends State<RegisterPage> {
                           onPressed: isLoading ? null : handleRegister,
                           child: Text(
                             isLoading ? "LOADING..." : "SIGNUP",
-                            style: const TextStyle(fontSize: 16, color: Colors.white),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
+
+                      // Auth google
+                      const SizedBox(height: 12),
+
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(
+                            Icons.g_mobiledata,
+                            size: 32,
+                            color: Colors.red,
+                          ),
+                          label: const Text(
+                            "DAFTAR DENGAN GOOGLE",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          onPressed: () async {
+                            final user = await GoogleAuthService()
+                                .signInWithGoogle();
+
+                            if (user != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "Login Google berhasil: ${user.email}",
+                                  ),
+                                ),
+                              );
+
+                              Navigator.pushReplacementNamed(context, '/home');
+                            }
+                          },
+                        ),
+                      ),
+
                       const SizedBox(height: 12),
                       GestureDetector(
                         onTap: () {

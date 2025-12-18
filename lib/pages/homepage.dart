@@ -84,7 +84,7 @@ class _HomopageState extends State<Homopage> {
                       SizedBox(width: 16),
                       InkWell(
                         onTap: () {
-                          Navigator.pushNamed(context, '/profil');
+                          Navigator.pushNamed(context, '/profil1');
                         },
                         child: CircleAvatar(
                           radius: 16,

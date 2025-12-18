@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "390995920602",
+    "project_id": "jagamata-4723f",
+    "storage_bucket": "jagamata-4723f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:390995920602:android:3a6814fe16fe6760df07e3",
+        "android_client_info": {
+          "package_name": "app.jagamata.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "390995920602-40rqooiha62loiju847ph38ei79dptbe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.jagamata.mobile",
+            "certificate_hash": "25831347d07d71da6c0eaa669143cacb224bb40c"
+          }
+        },
+        {
+          "client_id": "390995920602-8v1653eachn2fdbd29fcvd2jrfmemklj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBe51t3Y8F41pWUTKqayKo9kRZ28X4YYXE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "390995920602-8v1653eachn2fdbd29fcvd2jrfmemklj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
