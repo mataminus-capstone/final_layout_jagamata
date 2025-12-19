@@ -35,6 +35,8 @@ dependencies:
   firebase_core: ^3.6.0
   firebase_auth: ^5.3.0
   google_sign_in: ^6.2.1
+  camera: ^0.11.3
+  image_picker: ^1.2.1
     
 
   # The following adds the Cupertino Icons font to your application.
@@ -69,6 +71,8 @@ flutter:
   assets:
     - images/maskot.png
     - images/robot.png
+    - images/rekomen.jpg
+    - images/tretmen.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

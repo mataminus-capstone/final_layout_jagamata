@@ -16,122 +16,139 @@ class _TreatmentPageState extends State<TreatmentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Treatment',
-          style: TextStyle(
-            color: Color(0xFF4A77A1),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        // title: Text(
+        //   'Treatment',
+        //   style: TextStyle(
+        //     color: Color(0xFF4A77A1),
+        //     fontWeight: FontWeight.bold,
+        //   ),
+        // ),
         elevation: 0,
       ),
 
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFE6F2FA), Color(0xFFFDFEFF)],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(height: 40),
-
-                // Judul
-                Text(
-                  'Treatment Mata',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A3E57),
-                  ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            // mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 80,
+                backgroundColor: Colors.grey,
+                child: CircleAvatar(
+                  radius: 79,
+                  backgroundImage: AssetImage('images/tretmen.jpg'),
                 ),
-                SizedBox(height: 12),
+              ),
 
-                // Deskripsi
-                Text(
-                  'Pilih metode perawatan mata yang anda inginkan, untuk membantu merilekskan mata.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
-                    height: 1.4,
-                  ),
+              SizedBox(height: 20),
+
+              // Judul
+              Text(
+                'Treatment Mata',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1A3E57),
                 ),
-                SizedBox(height: 40),
-                // Kotak 1 - Senam Mata
-                
-                PressableCard(
-                  icon: Icons.remove_red_eye_outlined,
-                  title: "Senam Mata",
-                  description:
-                      "Rangkaian latihan gerakan untuk melatih otot di area mata.",
-                  onTap: () {
-                    Navigator.pushNamed(context, '/eyeExercise');
-                  },
+              ),
+              SizedBox(height: 12),
+
+              // Deskripsi
+              Text(
+                'Pilih metode perawatan mata yang anda inginkan, untuk membantu merilekskan mata.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                  height: 1.4,
                 ),
-                
-                SizedBox(height: 40),
-               
+              ),
 
-
-                // Kotak 2 - Teknik Akupresur
-                InkWell(
-                  onTap: () {
-                    // Aksi ketika kotak ditekan
-                  },
+              // simple eyecare
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
                   child: Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: Color(0xFF80AFCC),
+                      color: Colors.blue.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.touch_app_outlined,
-                          size: 40,
-                          color: Colors.black87,
+                          Icons.light_mode_rounded,
+                          size: 20,
+                          color: Colors.blue,
                         ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Teknik Akupresur',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Rangkaian pijatan lembut pada titik-titik tertentu di daerah sekitar mata.',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            ],
+                        SizedBox(width: 8),
+                        Text(
+                          'Simple eye care, everyday',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.blue.shade900,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
+              ),
 
-                SizedBox(height: 25),
-                Spacer(),
-              ],
-            ),
+              SizedBox(height: 60),
+
+              // Kotak 1 - Senam Mata
+              PressableCard(
+                icon: Icons.remove_red_eye_outlined,
+                title: "Senam Mata",
+                description: "Latihan ringan untuk membantu merilekskan mata.",
+                
+                onTap: () {
+                  Navigator.pushNamed(context, '/eyeExercise');
+                },
+              ),
+
+              SizedBox(height: 40),
+              // space
+              Container(
+                width: 250,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Divider(thickness: 1, color: Colors.grey[400]),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        "atau",
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(thickness: 1, color: Colors.grey[400]),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 30),
+
+              // Kotak 2 - Teknik Akupresur
+              PressableCard(
+                //icon pijat wajah
+                icon: Icons.touch_app_rounded,
+                title: 'Teknik Akupresur',
+                description:
+                    'Pijatan lembut pada titik-titik diarea sekitar mata.',
+                onTap: () {},
+              ),
+
+              SizedBox(height: 25),
+            ],
           ),
         ),
       ),

@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:jagamata/pages/PERCOBAAN/COBA.dart';
 import 'package:jagamata/pages/artikel/artikel.dart';
 import 'package:jagamata/pages/chatbot/chatbot.dart';
-import 'package:jagamata/pages/daftar.dart';
 import 'package:jagamata/pages/deteksi/deteksi.dart';
 import 'package:jagamata/pages/homepage.dart';
 import 'package:jagamata/pages/loginpage.dart';
@@ -43,7 +42,6 @@ class JagaMata extends StatelessWidget {
         '/klinik': (context) => KlinikMata(),
         '/setting': (context) => Setting(),
         '/artikel': (context) => Artikel(),
-        '/daftar': (context) => Daftar(),
         '/eyeExercise': (context) => Coba(),
         '/profil1': (context) => Profil1(),
       },

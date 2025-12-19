@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'camera_page.dart';
+import 'package:jagamata/services/image_picker.dart';
 
 class Deteksi extends StatefulWidget {
   const Deteksi({super.key});
@@ -46,8 +48,16 @@ class _DeteksiState extends State<Deteksi> {
 
             // Tombol Camera
             InkWell(
-              onTap: () {
-                // Aksi ketika tombol ditekan
+              onTap: () async {
+                final imagePath = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CameraPage()),
+                );
+
+                if (imagePath != null) {
+                  debugPrint("Foto diambil: $imagePath");
+                  // nanti → kirim ke model
+                }
               },
               child: Container(
                 width: 300,
@@ -113,8 +123,14 @@ class _DeteksiState extends State<Deteksi> {
 
             // Tombol Unggah Foto
             InkWell(
-              onTap: () {
-                // Aksi ketika tombol ditekan
+              onTap: () async {
+                final pickerService = ImagePickerService();
+                final image = await pickerService.pickFromGallery();
+
+                if (image != null) {
+                  debugPrint("Gambar dipilih: ${image.path}");
+                  // nanti → kirim ke model / halaman hasil
+                }
               },
               child: Container(
                 width: 300,
@@ -157,7 +173,8 @@ class _DeteksiState extends State<Deteksi> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.lock_outline, size: 20, color: Colors.green[400]), SizedBox(width: 8),
+                Icon(Icons.lock_outline, size: 20, color: Colors.green[400]),
+                SizedBox(width: 8),
                 Text(
                   "Data Anda aman, tidak tersimpan",
                   style: TextStyle(color: Colors.grey[600]),
