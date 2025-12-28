@@ -381,9 +381,10 @@ class _Profil1State extends State<Profil1> {
               margin: EdgeInsets.only(top: 950, bottom: 20),
               padding: EdgeInsets.only(left: 20),
               width: MediaQuery.of(context).size.width * 0.8,
-
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, '/login');
+                },
                 icon: Icon(Icons.logout_rounded, color: Colors.white),
                 label: Text("Logout", style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
@@ -395,7 +396,7 @@ class _Profil1State extends State<Profil1> {
                 ),
               ),
             ),
-            
+
             // ===== KONTEN PUTIH =====
             Container(
               width: MediaQuery.of(context).size.width * 0.9,

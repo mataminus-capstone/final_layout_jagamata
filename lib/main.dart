@@ -14,6 +14,8 @@ import 'package:jagamata/pages/registerpage.dart';
 import 'package:jagamata/pages/notifikasi.dart';
 import 'package:jagamata/pages/rekomendasi/klinik.dart';
 import 'package:jagamata/pages/rekomendasi/rekomendasi.dart';
+import 'package:jagamata/pages/treatment/eye_exercise_page.dart';
+import 'package:jagamata/pages/treatment/senam_mata.dart';
 import 'package:jagamata/pages/treatment/treatment.dart';
 
 void main() async {
@@ -31,6 +33,7 @@ class JagaMata extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: RegisterPage(),
       routes: {
+        '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
         '/home': (context) => Homopage(),
         '/notif': (context) => Notifikasi(),
@@ -44,6 +47,8 @@ class JagaMata extends StatelessWidget {
         '/artikel': (context) => Artikel(),
         '/eyeExercise': (context) => Coba(),
         '/profil1': (context) => Profil1(),
+        '/senammata': (context) => SenamMata(),
+        '/senameyes': (context) => EyeExercisePage()
       },
     );
   }

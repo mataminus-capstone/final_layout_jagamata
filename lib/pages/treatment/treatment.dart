@@ -109,7 +109,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
                 description: "Latihan ringan untuk membantu merilekskan mata.",
                 
                 onTap: () {
-                  Navigator.pushNamed(context, '/eyeExercise');
+                  Navigator.pushNamed(context, '/senameyes');
                 },
               ),
 
