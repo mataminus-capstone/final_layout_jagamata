@@ -73,6 +73,8 @@ flutter:
     - images/robot.png
     - images/rekomen.jpg
     - images/tretmen.jpg
+    - images/obat.jpg
+    - images/klinik.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
