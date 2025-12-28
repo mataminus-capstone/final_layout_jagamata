@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'package:jagamata/pages/PERCOBAAN/COBA.dart';
 import 'package:jagamata/pages/artikel/artikel.dart';
+import 'package:jagamata/pages/artikel/artikelnew.dart';
+import 'package:jagamata/pages/artikel/isiartikel.dart';
 import 'package:jagamata/pages/chatbot/chatbot.dart';
 import 'package:jagamata/pages/deteksi/deteksi.dart';
 import 'package:jagamata/pages/homepage.dart';
@@ -13,6 +15,7 @@ import 'package:jagamata/pages/profil/setting.dart';
 import 'package:jagamata/pages/registerpage.dart';
 import 'package:jagamata/pages/notifikasi.dart';
 import 'package:jagamata/pages/rekomendasi/klinik.dart';
+import 'package:jagamata/pages/rekomendasi/obat.dart';
 import 'package:jagamata/pages/rekomendasi/rekomendasi.dart';
 import 'package:jagamata/pages/treatment/eye_exercise_page.dart';
 import 'package:jagamata/pages/treatment/senam_mata.dart';
@@ -48,7 +51,11 @@ class JagaMata extends StatelessWidget {
         '/eyeExercise': (context) => Coba(),
         '/profil1': (context) => Profil1(),
         '/senammata': (context) => SenamMata(),
-        '/senameyes': (context) => EyeExercisePage()
+        '/senameyes': (context) => EyeExercisePage(),
+        '/obat' : (context) => Obat(),
+        '/artikelnew' : (context) => Artikelnew(),
+        '/isiartikel' : (context) => Isiartikel(),
+        
       },
     );
   }

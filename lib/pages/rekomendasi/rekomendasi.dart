@@ -23,7 +23,6 @@ class Rekomendasi extends StatelessWidget {
         child: Center(
           child: Column(
             children: [
-              
               //avatar
               CircleAvatar(
                 radius: 80,
@@ -34,27 +33,32 @@ class Rekomendasi extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Text(
-                  'Berdasarkan deteksi mata anda,berikut beberapa rekomendasi yang mungkin bermanfaat.',
-                  style: TextStyle(fontSize: 14),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-        
+
+              Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 25),
+              child: Text('Rekomendasi Klinik Mata dan Obat Mata',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue[900],
+              ),),),
+              //Spancing
+              SizedBox(height: 50),
+
+              // Klinik Mata
               Padding(
                 padding: const EdgeInsets.all(25),
                 child: PressableCard(
                   icon: Icons.home_work_outlined,
                   title: 'Klinik Mata',
                   description: 'Temukan klinik mata terpercaya di sekitarmu.',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(context, '/klinik');
+                  },
                 ),
               ),
-        
+
               //Spancing
-              SizedBox(height: 20),
+              SizedBox(height: 15),
               Container(
                 width: 250,
                 child: Row(
@@ -75,29 +79,40 @@ class Rekomendasi extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 10),
-        
+              SizedBox(height: 15),
               //Spancing
+
+              // Obat Mata
               Padding(
                 padding: const EdgeInsets.all(25),
                 child: PressableCard(
                   icon: Icons.medical_services_rounded,
                   title: 'Obat Mata',
-                  description:
-                      'Rekomendasi obat terkait permasalahan mata ringan.',
-                  onTap: () {},
+                  description: 'Rekomendasi obat terkait permasalahan matamu.',
+                  onTap: () {
+                    Navigator.pushNamed(context, '/obat');
+                  },
                 ),
               ),
-        
-              //Spancing
+
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 50),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Catatan',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.blue),
+                        SizedBox(width: 5),
+                        Text(
+                          'Catatan',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 6),
                     Container(
@@ -108,7 +123,7 @@ class Rekomendasi extends StatelessWidget {
                       ),
                       child: Text(
                         'Jika keluhan berlanjut, disarankan untuk melakukan pemeriksaan langsung ke tenaga medis.',
-                        style: TextStyle(fontSize: 13),
+                        style: TextStyle(fontSize: 13),textAlign: TextAlign.center,
                       ),
                     ),
                   ],

@@ -1,49 +1,62 @@
 import 'package:flutter/material.dart';
 
-class KlinikMata extends StatefulWidget {
-  const KlinikMata({super.key});
+class Obat extends StatefulWidget {
+  const Obat({super.key});
 
   @override
-  State<KlinikMata> createState() => _KlinikMataState();
+  State<Obat> createState() => _ObatState();
 }
 
-class _KlinikMataState extends State<KlinikMata> {
+class _ObatState extends State<Obat> {
   final ScrollController _scrollController = ScrollController();
-  List<Map<String, String>> klinikList = [
+  List<Map<String, String>> obatMataList = [
     {
-      'image': 'images/klinik.jpg',
-      'title': 'KLINIK A',
-      'jalan': 'Jl. Merdeka No.1',
-      'jarak': '1.2 km',
-      'jam': '08.00 - 21.00',
+      'image': 'images/obat.jpg',
+      'nama': 'Insto Regular',
+      'fungsi': 'Meredakan mata merah & iritasi ringan',
+      'aturanPakai': '1-2 tetes, 3x sehari',
+      'harga': 'Rp15.000',
+      'kategori': 'Obat Bebas',
+    },
+    {
+      'image': 'images/obat.jpg',
+      'nama': 'Insto XL',
+      'fungsi': 'Meredakan mata merah & iritasi ringan',
+      'aturanPakai': '1-2 tetes, 3x sehari',
+      'harga': 'Rp15.000',
+      'kategori': 'Obat Bebas',
+    },
+    {
+      'image': 'images/obat.jpg',
+      'nama': 'Insto M',
+      'fungsi': 'Meredakan mata merah & iritasi ringan',
+      'aturanPakai': '1-2 tetes, 3x sehari',
+      'harga': 'Rp15.000',
+      'kategori': 'Obat Bebas',
     },
     {
       'image': 'images/klinik.jpg',
-      'title': 'Klinik B',
-      'jalan': 'Jl. Ga Merdeka No.99',
-      'jarak': '9 km',
-      'jam': '09.00 - 20.00',
+      'nama': 'Cendo Xitrol',
+      'fungsi': 'Infeksi mata akibat bakteri',
+      'aturanPakai': '1 tetes, 3-4x sehari',
+      'harga': 'Rp35.000',
+      'kategori': 'Resep Dokter',
     },
     {
       'image': 'images/klinik.jpg',
-      'title': 'Klinik C',
-      'jalan': 'Jl. Hampir Merdeka No.1/5',
-      'jarak': '4 km',
-      'jam': '08.00 - 18.00',
+      'nama': 'Eyemo',
+      'fungsi': 'Iritasi ringan & mata lelah',
+      'aturanPakai': '1-2 tetes, 3x sehari',
+      'harga': 'Rp18.000',
+      'kategori': 'Obat Bebas',
     },
     {
       'image': 'images/klinik.jpg',
-      'title': 'Klinik D',
-      'jalan': 'Jl. Hampir Merdeka No.1/5',
-      'jarak': '4 km',
-      'jam': '08.00 - 18.00',
-    },
-    {
-      'image': 'images/klinik.jpg',
-      'title': 'Klinik E',
-      'jalan': 'Jl. Hampir Merdeka No.1/5',
-      'jarak': '4 km',
-      'jam': '08.00 - 18.00',
+      'nama': 'Cendo Lyteers',
+      'fungsi': 'Mata kering & kurang air mata',
+      'aturanPakai': '1-2 tetes sesuai kebutuhan',
+      'harga': 'Rp40.000',
+      'kategori': 'Obat Bebas',
     },
   ];
 
@@ -56,7 +69,7 @@ class _KlinikMataState extends State<KlinikMata> {
         child: Column(
           children: [
             Text(
-              'Daftar Rekomendasi Klinik Mata',
+              'Daftar Rekomendasi Obat Mata',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -90,22 +103,13 @@ class _KlinikMataState extends State<KlinikMata> {
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: 'Terdekat',
-                        child: InkWell(onTap: () {}, child: Text('Terdekat')),
+                        child: InkWell(onTap: () {}, child: Text('Obat Bebas')),
                       ),
                       PopupMenuItem(
                         value: 'Terbaik',
-                        child: InkWell(onTap: () {}, child: Text('Terbaik')),
+                        child: InkWell(onTap: () {}, child: Text('Resep Dokter')),
                       ),
-                      PopupMenuItem(
-                        value: 'Buka Sekarang',
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/');
-                          },
-                          child: Text('Buka Sekarang'),
-                        ),
-                      ),
-                    ],
+                    ]
                   ),
                   // Icon(Icons.filter_alt, color: Colors.grey)
                   border: OutlineInputBorder(
@@ -115,37 +119,52 @@ class _KlinikMataState extends State<KlinikMata> {
               ),
             ),
 
-            /// Saran jika bisa yaa , akan menampilkan ini jika filter tidak aktif maupun aktif
+            // tips
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                  SizedBox(width: 6),
+                  Text(
+                    'Tips Kesehatan Mata',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ),
 
-            // Column(
-            //   children: [
-            //     Icon(Icons.search_off, size: 60, color: Colors.grey),
-            //     Text('Klinik tidak ditemukan'),
-            //   ],
-            // ),
-
-            // Column(
-            //   children: [
-            //     Icon(Icons.search, size: 60, color: Colors.grey),
-            //     SizedBox(height: 10),
-            //     Text(
-            //       'Menampilkan 3 klinik',
-            //     ),
-            //   ],
-            // ),
-
-            // =====================================================
-
-            
+            Container(
+              width: 350,
+              padding: EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '• Hindari menyentuh mata dengan tangan kotor',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '• Jika iritasi berlanjut, segera konsultasi dokter',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.all(24.0),
                 child: ListView.builder(
-                  itemCount: klinikList.length + 1,
+                  itemCount: obatMataList.length + 1,
                   controller: _scrollController,
                   itemBuilder: (context, index) {
                     // ================= FOOTER =================
-                    if (index == klinikList.length) {
+                    if (index == obatMataList.length) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Column(
@@ -181,12 +200,15 @@ class _KlinikMataState extends State<KlinikMata> {
                     }
 
                     // ============== CARD ===================
-                    final artikel = klinikList[index];
+                    final obat = obatMataList[index];
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       child: Card(
-                        elevation: 10, // <-- INI
-                        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        elevation: 8, // <-- INI
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -199,14 +221,14 @@ class _KlinikMataState extends State<KlinikMata> {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
                                 child: Image.asset(
-                                  artikel['image']!,
+                                  obat['image']!,
                                   width: 100,
                                   height: 100,
                                   fit: BoxFit.cover,
                                 ),
                               ),
                               SizedBox(width: 12),
-                      
+
                               // Text Area
                               Expanded(
                                 child: Column(
@@ -214,18 +236,18 @@ class _KlinikMataState extends State<KlinikMata> {
                                   children: [
                                     // Nama Obat
                                     Text(
-                                      artikel['title']!,
+                                      obat['nama']!,
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                      
+
                                     SizedBox(height: 4),
-                      
+
                                     // Fungsi
                                     Text(
-                                      artikel['jalan']!,
+                                      obat['fungsi']!,
                                       style: TextStyle(
                                         fontSize: 13,
                                         color: Colors.grey[600],
@@ -233,87 +255,47 @@ class _KlinikMataState extends State<KlinikMata> {
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                      
-                                    SizedBox(height: 4),
-                      
-                                    Row(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.location_on,
-                                              color: Colors.red,
-                                              size: 18,
-                                            ),
-                                            SizedBox(width: 2),
-                                            Text(
-                                              artikel['jarak']!,
-                                              style: TextStyle(
-                                                color: Colors.black54,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                          ],
+
+                                    SizedBox(height: 6),
+
+                                    // Kategori
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: obat['kategori'] == 'Obat Bebas'
+                                            ? Colors.green[100]
+                                            : Colors.red[100],
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        obat['kategori']!,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                          color:
+                                              obat['kategori'] == 'Obat Bebas'
+                                              ? Colors.green[800]
+                                              : Colors.red[800],
                                         ),
-                                      SizedBox(width: 15,),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.access_time_rounded,
-                                              color: Colors.black,
-                                              size: 18,
-                                            ),
-                                            SizedBox(width: 2),
-                                            Text(
-                                              artikel['jam']!,
-                                              style: TextStyle(
-                                                color: Colors.black54,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: Colors.blue,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.call,
-                                      color: Colors.white,
-                                      size: 15,
-                                    ),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      'Telepon',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                      
+
                               //next
-                              //    Row(
-                              //      children: [
-                              //        Icon(
-                              //          Icons.navigate_next,
-                              //          size: 30,
-                              //          color: Colors.grey,
-                              //        ),
-                              //      ],
-                              //    ),
-                              //
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.navigate_next,
+                                    size: 30,
+                                    color: Colors.grey,
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),

@@ -36,6 +36,30 @@ class _HomopageState extends State<Homopage> {
     },
   ];
 
+  List<Map<String, String>> artikelHomeList = [
+    {
+      'judul': '5 Buah yang Baik untuk Kesehatan Mata',
+      'desc': 'Buah dengan vitamin A tinggi bantu jaga kesehatan mata.',
+      'image': 'images/maskot.png',
+      'kategori': 'Tips Mata',
+      'waktu': '3 menit baca',
+    },
+    {
+      'judul': 'Kenapa Mata Sering Lelah Saat Main HP?',
+      'desc': 'Kebiasaan kecil ini bisa bikin mata cepat capek.',
+      'image': 'images/maskot.png',
+      'kategori': 'Edukasi',
+      'waktu': '4 menit baca',
+    },
+    {
+      'judul': 'Cara Sederhana Mencegah Mata Kering',
+      'desc': 'Tips ringan yang bisa kamu lakuin setiap hari.',
+      'image': 'images/maskot.png',
+      'kategori': 'Perawatan',
+      'waktu': '2 menit baca',
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -331,21 +355,155 @@ class _HomopageState extends State<Homopage> {
 
               SizedBox(height: 15),
 
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/artikel');
-                  },
-                  child: Text(
-                    "Lihat selengkapnya",
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
+              ListView.builder(
+                // itemCount: artikelHomeList.length,
+                itemCount: artikelHomeList.length + 1,
+
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  // ================= FOOTER =================
+                  if (index == artikelHomeList.length) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Column(
+                        children: [
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/artikelnew');
+                              },
+                              child: Text(
+                                "Lihat selengkapnya",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  final artikel = artikelHomeList[index];
+
+                  return Container(
+                    margin: EdgeInsets.symmetric(vertical: 10),
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: Offset(-4, 8),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
+                    child: Container(
+                      padding: EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          // IMAGE
+                          ClipPath(
+                            child: Image.asset(
+                              artikel['image']!,
+                              width: 80,
+                              height: 80,
+
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+
+                          // TEXT
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  artikel['judul']!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+
+                                SizedBox(height: 6),
+
+                                Text(
+                                  artikel['desc']!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+
+                                SizedBox(height: 8),
+
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade50,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        artikel['kategori']!,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Icon(
+                                      Icons.access_time,
+                                      size: 14,
+                                      color: Colors.grey,
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      artikel['waktu']!,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                         
+                          SizedBox(width: 8,),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Icon(
+                                Icons.navigate_next_rounded,
+                                size: 30,
+                                color: Colors.blue.withOpacity(0.7),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
+            
             ],
           ),
         ),
