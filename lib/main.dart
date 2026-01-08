@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:jagamata/pages/PERCOBAAN/COBA.dart';
 import 'package:jagamata/pages/artikel/artikel.dart';
@@ -20,10 +20,17 @@ import 'package:jagamata/pages/rekomendasi/rekomendasi.dart';
 import 'package:jagamata/pages/treatment/eye_exercise_page.dart';
 import 'package:jagamata/pages/treatment/senam_mata.dart';
 import 'package:jagamata/pages/treatment/treatment.dart';
+import 'package:jagamata/services/api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  
+  final prefs = await SharedPreferences.getInstance();
+  final savedToken = prefs.getString('jwt_token');
+  if (savedToken != null) {
+    ApiService.setToken(savedToken);
+  }
+  
   runApp(const JagaMata());
 }
 
@@ -55,7 +62,6 @@ class JagaMata extends StatelessWidget {
         '/obat' : (context) => Obat(),
         '/artikelnew' : (context) => Artikelnew(),
         '/isiartikel' : (context) => Isiartikel(),
-        
       },
     );
   }

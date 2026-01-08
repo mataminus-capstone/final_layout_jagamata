@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:jagamata/services/api_service.dart';
 import 'package:jagamata/services/google_auth_service.dart';
 
-
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -41,6 +40,52 @@ class _RegisterPageState extends State<RegisterPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result['message'] ?? "Registrasi gagal!")),
       );
+    }
+  }
+
+  void handleGoogleRegister() async {
+    setState(() => isLoading = true);
+    try {
+      final googleAuthService = GoogleAuthService();
+      final googleData = await googleAuthService.signIn();
+      
+      if (googleData != null) {
+        final code = googleData.authorizationCode ?? '';
+        
+        if (code.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Gagal mendapatkan authorization code")),
+          );
+          return;
+        }
+        
+        final result = await ApiService.loginWithGoogle(code: code);
+        
+        if (result['success']) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Registrasi Google berhasil!")),
+          );
+          
+          Future.delayed(const Duration(milliseconds: 800), () {
+            Navigator.pushReplacementNamed(context, '/home');
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result['message'] ?? "Registrasi Google gagal")),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Google sign in dibatalkan")),
+        );
+      }
+    } catch (e) {
+      print('[DEBUG] Google register error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.toString()}")),
+      );
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
@@ -154,47 +199,28 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                       ),
-
-                      // Auth google
                       const SizedBox(height: 12),
-
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           icon: const Icon(
                             Icons.g_mobiledata,
-                            size: 32,
+                            size: 24,
                             color: Colors.red,
                           ),
                           label: const Text(
                             "DAFTAR DENGAN GOOGLE",
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 14),
                           ),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
                           ),
-                          onPressed: () async {
-                            final user = await GoogleAuthService()
-                                .signInWithGoogle();
-
-                            if (user != null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "Login Google berhasil: ${user.email}",
-                                  ),
-                                ),
-                              );
-
-                              Navigator.pushReplacementNamed(context, '/home');
-                            }
-                          },
+                          onPressed: isLoading ? null : handleGoogleRegister,
                         ),
                       ),
-
                       const SizedBox(height: 12),
                       GestureDetector(
                         onTap: () {

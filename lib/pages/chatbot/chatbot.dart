@@ -13,6 +13,7 @@ class _ChatbotState extends State<Chatbot> {
   List<Map<String, String>> messages = [
     {'sender': 'bot', 'text': 'Hayy apakah ada yang bisa saya bantu?'}
   ];
+  bool isLoading = false;
 
   void sendMessage() async {
     String userMessage = messageController.text.trim();
@@ -21,20 +22,22 @@ class _ChatbotState extends State<Chatbot> {
     setState(() {
       messages.add({'sender': 'user', 'text': userMessage});
       messageController.clear();
+      isLoading = true;
     });
 
     final result = await ApiService.sendChatMessage(userMessage);
 
     setState(() {
+      isLoading = false;
       if (result['success']) {
         messages.add({
           'sender': 'bot',
-          'text': result['response'],
+          'text': result['response'] ?? 'Maaf, saya tidak bisa merespons saat ini.',
         });
       } else {
         messages.add({
           'sender': 'bot',
-          'text': 'Maaf, saya tidak bisa merespons saat ini.',
+          'text': result['response'] ?? 'Maaf, saya tidak bisa merespons saat ini.',
         });
       }
     });
@@ -44,22 +47,30 @@ class _ChatbotState extends State<Chatbot> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
         title: Container(
-          padding: EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    backgroundImage: AssetImage('aset/image.jpg'),
+                  const CircleAvatar(
+                    backgroundColor: Color(0xFF4A77A1),
+                    child: Icon(Icons.smart_toy, color: Colors.white),
                   ),
-                  SizedBox(width: 15),
-                  Text("ChatBot AI"),
+                  const SizedBox(width: 15),
+                  const Text(
+                    "ChatBot AI",
+                    style: TextStyle(
+                      color: Color(0xFF4A77A1),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
-              Icon(Icons.more_vert),
+              const Icon(Icons.more_vert, color: Color(0xFF4A77A1)),
             ],
           ),
         ),
@@ -67,7 +78,7 @@ class _ChatbotState extends State<Chatbot> {
       body: Stack(
         children: [
           Container(
-            width: 502,
+            width: double.infinity,
             decoration: BoxDecoration(color: Colors.blue[50]),
             child: ListView.builder(
               itemCount: messages.length,
@@ -85,15 +96,21 @@ class _ChatbotState extends State<Chatbot> {
                         left: isBot ? 10 : 0,
                         right: isBot ? 0 : 10,
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      constraints: BoxConstraints(maxWidth: 250),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      constraints: const BoxConstraints(maxWidth: 280),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: Colors.blue[200],
+                        color: isBot ? Colors.blue[200] : const Color(0xFF4A77A1),
                       ),
                       child: Text(
                         msg['text'] ?? '',
                         softWrap: true,
+                        style: TextStyle(
+                          color: isBot ? Colors.black87 : Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -106,17 +123,18 @@ class _ChatbotState extends State<Chatbot> {
             left: 10,
             right: 10,
             child: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-              ),
+              padding: const EdgeInsets.all(8),
               child: TextField(
                 controller: messageController,
+                enabled: !isLoading,
                 decoration: InputDecoration(
                   hintText: "Ketik pesan...",
                   suffixIcon: GestureDetector(
-                    onTap: sendMessage,
-                    child: Icon(Icons.send_sharp),
+                    onTap: isLoading ? null : sendMessage,
+                    child: Icon(
+                      Icons.send_sharp,
+                      color: isLoading ? Colors.grey : Colors.blue,
+                    ),
                   ),
                   fillColor: Colors.white,
                   filled: true,
@@ -124,12 +142,18 @@ class _ChatbotState extends State<Chatbot> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                onSubmitted: (_) => sendMessage(),
+                onSubmitted: (_) => isLoading ? null : sendMessage(),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    messageController.dispose();
+    super.dispose();
   }
 }

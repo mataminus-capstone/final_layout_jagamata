@@ -1,36 +1,62 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:jagamata/services/api_service.dart';
+
+class GoogleSignInData {
+  final String email;
+  final String displayName;
+  final String? authorizationCode;
+  final String? idToken;
+  final String? accessToken;
+
+  GoogleSignInData({
+    required this.email,
+    required this.displayName,
+    this.authorizationCode,
+    this.idToken,
+    this.accessToken,
+  });
+}
 
 class GoogleAuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'profile',
+    ],
+    serverClientId: 'YOUR_GOOGLE_SERVER_CLIENT_ID_HERE', // Ganti dengan Server Client ID Anda dari Google Console
+  );
 
-  Future<User?> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+  Future<GoogleSignInData?> signIn() async {
+    try {
+      final googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        print('[DEBUG] Google sign in cancelled by user');
+        return null;
+      }
 
-    if (googleUser == null) return null;
+      final googleAuth = await googleUser.authentication;
+      
+      print('[DEBUG] Google sign in successful');
+      print('[DEBUG] Authorization code: ${googleAuth.serverAuthCode}');
 
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
-
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    final userCredential = await _auth.signInWithCredential(credential);
-
-    final user = userCredential.user;
-
-    if (user != null) {
-      await ApiService.loginWithGoogle(
-        email: user.email!,
-        name: user.displayName ?? user.email!.split('@')[0],
-        googleId: user.uid, // firebase uid
+      return GoogleSignInData(
+        email: googleUser.email,
+        displayName: googleUser.displayName ?? 'User',
+        authorizationCode: googleAuth.serverAuthCode, // Authorization code untuk backend
+        idToken: googleAuth.idToken,
+        accessToken: googleAuth.accessToken,
       );
+    } catch (e) {
+      print('[DEBUG] Error signing in with Google: $e');
+      return null;
     }
+  }
 
-    return user;
+  Future<void> signOut() async {
+    try {
+      await _googleSignIn.signOut();
+      print('[DEBUG] Google sign out successful');
+    } catch (e) {
+      print('[DEBUG] Error signing out: $e');
+    }
   }
 }

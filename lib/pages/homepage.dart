@@ -10,7 +10,7 @@ class Homopage extends StatefulWidget {
 }
 
 class _HomopageState extends State<Homopage> {
-  List<Map<String, String>> artikelList = [];
+  List<Map<String, dynamic>> artikelList = [];
   bool isLoading = true;
 
   final List<Map<String, String>> fiturList = const [
@@ -36,30 +36,6 @@ class _HomopageState extends State<Homopage> {
     },
   ];
 
-  List<Map<String, String>> artikelHomeList = [
-    {
-      'judul': '5 Buah yang Baik untuk Kesehatan Mata',
-      'desc': 'Buah dengan vitamin A tinggi bantu jaga kesehatan mata.',
-      'image': 'images/maskot.png',
-      'kategori': 'Tips Mata',
-      'waktu': '3 menit baca',
-    },
-    {
-      'judul': 'Kenapa Mata Sering Lelah Saat Main HP?',
-      'desc': 'Kebiasaan kecil ini bisa bikin mata cepat capek.',
-      'image': 'images/maskot.png',
-      'kategori': 'Edukasi',
-      'waktu': '4 menit baca',
-    },
-    {
-      'judul': 'Cara Sederhana Mencegah Mata Kering',
-      'desc': 'Tips ringan yang bisa kamu lakuin setiap hari.',
-      'image': 'images/maskot.png',
-      'kategori': 'Perawatan',
-      'waktu': '2 menit baca',
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -70,10 +46,35 @@ class _HomopageState extends State<Homopage> {
     final result = await ApiService.getArticles();
     setState(() {
       if (result['success']) {
-        artikelList = List<Map<String, String>>.from(result['data']);
+        artikelList = List<Map<String, dynamic>>.from(result['data']);
       }
       isLoading = false;
     });
+  }
+
+  String _formatDate(String? dateString) {
+    if (dateString == null) return 'Baru';
+    try {
+      final date = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final difference = now.difference(date);
+
+      if (difference.inMinutes < 60) {
+        return '${difference.inMinutes} menit lalu';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours} jam lalu';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays} hari lalu';
+      } else {
+        final months = [
+          'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        return '${date.day} ${months[date.month - 1]}';
+      }
+    } catch (e) {
+      return 'Baru';
+    }
   }
 
   @override
@@ -279,74 +280,121 @@ class _HomopageState extends State<Homopage> {
               else
                 Column(
                   children: List.generate(
-                    artikelList.length > 3 ? 3 : artikelList.length,
+                    artikelList.length,
                     (index) {
                       final artikel = artikelList[index];
-                      return Container(
-                        margin: EdgeInsets.only(bottom: 12),
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 4,
-                              offset: Offset(1, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.asset(
-                                artikel['gambar']!,
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
+                      return InkWell(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/isiartikel',
+                            arguments: artikel['id'],
+                          );
+                        },
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 10),
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 4,
+                                offset: Offset(-4, 8),
                               ),
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    artikel['judul']!,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.black87,
-                                    ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFF80AFCC),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    artikel['ringkasan']!,
-                                    style: TextStyle(
-                                      color: Colors.black54,
-                                      fontSize: 13,
-                                    ),
+                                  child: Image.asset(
+                                    'images/maskot.png',
+                                    fit: BoxFit.cover,
                                   ),
-                                  SizedBox(height: 4),
-                                  InkWell(
-                                    onTap: () {
-                                      if (artikel.containsKey('url')) {
-                                        launchUrl(Uri.parse(artikel['url']!));
-                                      }
-                                    },
-                                    child: Text(
-                                      'Baca selengkapnya...',
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      artikel['title'] ?? 'No Title',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        color: Color(0xFF2F6F7E),
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    SizedBox(height: 6),
+                                    Text(
+                                      (artikel['content'] as String? ?? '').length > 100
+                                          ? (artikel['content'] as String).substring(0, 100) + '...'
+                                          : (artikel['content'] as String? ?? ''),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.shade50,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Text(
+                                            'Artikel',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.blue,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 10),
+                                        Icon(
+                                          Icons.access_time,
+                                          size: 14,
+                                          color: Colors.grey,
+                                        ),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          _formatDate(artikel['created_at']),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                              SizedBox(width: 8),
+                              Icon(
+                                Icons.navigate_next_rounded,
+                                size: 30,
+                                color: Colors.blue.withOpacity(0.7),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -355,155 +403,21 @@ class _HomopageState extends State<Homopage> {
 
               SizedBox(height: 15),
 
-              ListView.builder(
-                // itemCount: artikelHomeList.length,
-                itemCount: artikelHomeList.length + 1,
-
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  // ================= FOOTER =================
-                  if (index == artikelHomeList.length) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Column(
-                        children: [
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.pushNamed(context, '/artikelnew');
-                              },
-                              child: Text(
-                                "Lihat selengkapnya",
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  final artikel = artikelHomeList[index];
-
-                  return Container(
-                    margin: EdgeInsets.symmetric(vertical: 10),
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4,
-                          offset: Offset(-4, 8),
-                        ),
-                      ],
+              Align(
+                alignment: Alignment.centerRight,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/artikelnew');
+                  },
+                  child: Text(
+                    "Lihat selengkapnya",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
                     ),
-                    child: Container(
-                      padding: EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          // IMAGE
-                          ClipPath(
-                            child: Image.asset(
-                              artikel['image']!,
-                              width: 80,
-                              height: 80,
-
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-
-                          // TEXT
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  artikel['judul']!,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
-                                ),
-
-                                SizedBox(height: 6),
-
-                                Text(
-                                  artikel['desc']!,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey[700],
-                                  ),
-                                ),
-
-                                SizedBox(height: 8),
-
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.shade50,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        artikel['kategori']!,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.blue,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 10),
-                                    Icon(
-                                      Icons.access_time,
-                                      size: 14,
-                                      color: Colors.grey,
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      artikel['waktu']!,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                         
-                          SizedBox(width: 8,),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Icon(
-                                Icons.navigate_next_rounded,
-                                size: 30,
-                                color: Colors.blue.withOpacity(0.7),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                  ),
+                ),
               ),
-            
             ],
           ),
         ),

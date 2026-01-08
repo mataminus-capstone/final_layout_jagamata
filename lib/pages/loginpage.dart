@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jagamata/services/api_service.dart';
+import 'package:jagamata/services/google_auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -9,20 +10,20 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   bool isLoading = false;
 
   void handleLogin() async {
-    FocusScope.of(context).unfocus(); // 🔥 tutup keyboard
+    FocusScope.of(context).unfocus();
 
-    String username = usernameController.text.trim();
+    String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
-    if (username.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Isi username dan password terlebih dahulu!")),
+        const SnackBar(content: Text("Isi email dan password terlebih dahulu!")),
       );
       return;
     }
@@ -30,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => isLoading = true);
 
     final result = await ApiService.login(
-      username: username,
+      email: email,
       password: password,
     );
 
@@ -51,9 +52,57 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void handleGoogleLogin() async {
+    setState(() => isLoading = true);
+    try {
+      final googleAuthService = GoogleAuthService();
+      final googleData = await googleAuthService.signIn();
+      
+      if (googleData != null) {
+        final code = googleData.authorizationCode ?? '';
+        
+        if (code.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Gagal mendapatkan authorization code")),
+          );
+          return;
+        }
+        
+        print('[DEBUG] Attempting login with code: ${code.substring(0, 20)}...');
+        
+        final result = await ApiService.loginWithGoogle(code: code);
+        
+        if (result['success']) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Login Google berhasil!")),
+          );
+          
+          Future.delayed(const Duration(milliseconds: 800), () {
+            Navigator.pushReplacementNamed(context, '/home');
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result['message'] ?? "Login Google gagal")),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Google sign in dibatalkan")),
+        );
+      }
+    } catch (e) {
+      print('[DEBUG] Google login error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.toString()}")),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
   @override
   void dispose() {
-    usernameController.dispose();
+    emailController.dispose();
     passwordController.dispose();
     super.dispose();
   }
@@ -98,10 +147,10 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     children: [
                       TextField(
-                        controller: usernameController,
+                        controller: emailController,
                         decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.person_outlined),
-                          labelText: 'Username',
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          labelText: 'Email',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -135,6 +184,28 @@ class _LoginPageState extends State<LoginPage> {
                             isLoading ? "LOADING..." : "LOGIN",
                             style: const TextStyle(color: Colors.white),
                           ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(
+                            Icons.g_mobiledata,
+                            size: 24,
+                            color: Colors.red,
+                          ),
+                          label: const Text(
+                            "LOGIN DENGAN GOOGLE",
+                            style: TextStyle(fontSize: 14),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          onPressed: isLoading ? null : handleGoogleLogin,
                         ),
                       ),
                       const SizedBox(height: 12),
