@@ -107,19 +107,24 @@ class _HomopageState extends State<Homopage> {
                         child: Icon(Icons.notifications, color: Colors.black54),
                       ),
                       SizedBox(width: 16),
-                      InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/profil1');
-                        },
-                        child: CircleAvatar(
-                          radius: 16,
-                          backgroundColor: Colors.white,
-                          child: Icon(
-                            Icons.person_outline,
-                            color: Colors.black54,
+                        InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/profil1');
+                          },
+                          child: CircleAvatar(
+                            radius: 16,
+                            backgroundColor: Colors.white,
+                            backgroundImage: ApiService.userData != null && ApiService.userData!['profile_picture'] != null
+                                ? NetworkImage(ApiService.userData!['profile_picture'])
+                                : null,
+                            child: ApiService.userData != null && ApiService.userData!['profile_picture'] != null
+                                ? null
+                                : Icon(
+                                    Icons.person_outline,
+                                    color: Colors.black54,
+                                  ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ],

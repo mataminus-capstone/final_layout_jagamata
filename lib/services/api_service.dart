@@ -125,20 +125,20 @@ class ApiService {
 
   static Future<Map<String, dynamic>> loginWithGoogle({
     required String code,
+    String? idToken,
   }) async {
     try {
-      print('[DEBUG] Sending Google OAuth code to backend: $code');
-      if (code.isEmpty) {
-        return {
-          'success': false,
-          'message': 'Authorization code tidak ditemukan',
-        };
-      }
+      print('[DEBUG] Sending Google OAuth data to backend: code=${code.isNotEmpty}, idToken=${idToken != null}');
+      
+      final body = {
+        'code': code,
+        if (idToken != null) 'id_token': idToken,
+      };
 
       final response = await http.post(
         Uri.parse('$baseUrl/api/auth/oauth/mobile/callback'),
         headers: _getHeaders(),
-        body: jsonEncode({'code': code}),
+        body: jsonEncode(body),
       ).timeout(timeout);
 
       print('[DEBUG] OAuth response status: ${response.statusCode}');

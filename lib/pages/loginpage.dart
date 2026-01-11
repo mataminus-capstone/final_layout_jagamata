@@ -60,17 +60,22 @@ class _LoginPageState extends State<LoginPage> {
       
       if (googleData != null) {
         final code = googleData.authorizationCode ?? '';
+        final idToken = googleData.idToken ?? '';
         
-        if (code.isEmpty) {
+        if (code.isEmpty && idToken.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Gagal mendapatkan authorization code")),
+            const SnackBar(content: Text("Gagal mendapatkan kode otorisasi atau ID Token")),
           );
           return;
         }
         
-        print('[DEBUG] Attempting login with code: ${code.substring(0, 20)}...');
+        print('[DEBUG] Attempting login with code: ${code.substring(0, code.length > 20 ? 20 : code.length)}...');
+        print('[DEBUG] ID Token available: ${idToken.isNotEmpty}');
         
-        final result = await ApiService.loginWithGoogle(code: code);
+        final result = await ApiService.loginWithGoogle(
+          code: code,
+          idToken: idToken,
+        );
         
         if (result['success']) {
           ScaffoldMessenger.of(context).showSnackBar(
