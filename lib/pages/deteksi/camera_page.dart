@@ -21,9 +21,19 @@ class _CameraPageState extends State<CameraPage> {
     initCamera();
   }
 
+  String? errorMessage;
+
   Future<void> initCamera() async {
-    await _cameraService.init();
-    setState(() => ready = true);
+    try {
+      await _cameraService.init();
+      if (mounted) {
+        setState(() => ready = true);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => errorMessage = "Gagal membuka kamera: $e");
+      }
+    }
   }
 
   @override
@@ -34,6 +44,17 @@ class _CameraPageState extends State<CameraPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(title: Text("Kamera Error")),
+        body: Center(
+            child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Text(errorMessage!, textAlign: TextAlign.center),
+        )),
+      );
+    }
+
     if (!ready) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),

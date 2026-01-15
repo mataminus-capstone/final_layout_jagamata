@@ -70,8 +70,17 @@ class _RegisterPageState extends State<RegisterPage> {
             const SnackBar(content: Text("Registrasi Google berhasil!")),
           );
           
+          final userData = result['data'];
+          final address = userData['address'];
+          final phoneNumber = userData['phone_number'];
+
           Future.delayed(const Duration(milliseconds: 800), () {
-            Navigator.pushReplacementNamed(context, '/home');
+            if (address == null || address.toString().isEmpty || 
+                phoneNumber == null || phoneNumber.toString().isEmpty) {
+              Navigator.pushReplacementNamed(context, '/complete-profile');
+            } else {
+              Navigator.pushReplacementNamed(context, '/home');
+            }
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

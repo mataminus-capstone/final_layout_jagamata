@@ -21,6 +21,8 @@ import 'package:jagamata/pages/treatment/eye_exercise_page.dart';
 import 'package:jagamata/pages/treatment/senam_mata.dart';
 import 'package:jagamata/pages/treatment/treatment.dart';
 import 'package:jagamata/services/api_service.dart';
+import 'package:jagamata/pages/complete_profile_page.dart';
+import 'package:jagamata/pages/profil/history_detection_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +64,8 @@ class JagaMata extends StatelessWidget {
         '/obat' : (context) => Obat(),
         '/artikelnew' : (context) => Artikelnew(),
         '/isiartikel' : (context) => Isiartikel(),
+        '/complete-profile': (context) => CompleteProfilePage(),
+        '/history_detection': (context) => HistoryDetectionPage(),
       },
     );
   }

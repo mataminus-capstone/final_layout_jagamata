@@ -43,7 +43,7 @@ class _HomopageState extends State<Homopage> {
   }
 
   void fetchArticles() async {
-    final result = await ApiService.getArticles();
+    final result = await ApiService.getArticles(page: 1, perPage: 3);
     setState(() {
       if (result['success']) {
         artikelList = List<Map<String, dynamic>>.from(result['data']);
@@ -109,7 +109,7 @@ class _HomopageState extends State<Homopage> {
                       SizedBox(width: 16),
                         InkWell(
                           onTap: () {
-                            Navigator.pushNamed(context, '/profil1');
+                            Navigator.pushNamed(context, '/profil');
                           },
                           child: CircleAvatar(
                             radius: 16,
@@ -321,10 +321,21 @@ class _HomopageState extends State<Homopage> {
                                     color: Color(0xFF80AFCC),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Image.asset(
-                                    'images/maskot.png',
-                                    fit: BoxFit.cover,
-                                  ),
+                                  child: artikel['image_url'] != null
+                                      ? Image.network(
+                                          artikel['image_url'],
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return Image.asset(
+                                              'images/maskot.png',
+                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                        )
+                                      : Image.asset(
+                                          'images/maskot.png',
+                                          fit: BoxFit.cover,
+                                        ),
                                 ),
                               ),
                               SizedBox(width: 12),

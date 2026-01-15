@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jagamata/services/api_service.dart';
 
 class Artikelnew extends StatefulWidget {
   const Artikelnew({super.key});
@@ -9,161 +10,123 @@ class Artikelnew extends StatefulWidget {
 
 class _ArtikelnewState extends State<Artikelnew> {
   final ScrollController _scrollController = ScrollController();
+  List<Map<String, dynamic>> artikelList = [];
+  bool isLoading = false;
+  int currentPage = 1;
+  bool hasMore = true;
 
-  List<Map<String, String>> artikelList = [
-    {
-      'judul': '5 Buah yang Baik untuk Kesehatan Mata',
-      'desc': 'Buah dengan vitamin A tinggi bantu jaga kesehatan mata.',
-      'image': 'images/maskot.png',
-      'kategori': 'Tips Mata',
-      'waktu': '3 menit baca',
-    },
-    {
-      'judul': 'Kenapa Mata Sering Lelah Saat Main HP?',
-      'desc': 'Kebiasaan kecil ini bisa bikin mata cepat capek.',
-      'image': 'images/maskot.png',
-      'kategori': 'Edukasi',
-      'waktu': '4 menit baca',
-    },
-    {
-      'judul': 'Cara Sederhana Mencegah Mata Kering',
-      'desc': 'Tips ringan yang bisa kamu lakuin setiap hari.',
-      'image': 'images/maskot.png',
-      'kategori': 'Perawatan',
-      'waktu': '2 menit baca',
-    },
-    {
-      'judul': 'Cara Sederhana Mencegah Mata Kering',
-      'desc': 'Tips ringan yang bisa kamu lakuin setiap hari.',
-      'image': 'images/maskot.png',
-      'kategori': 'Perawatan',
-      'waktu': '2 menit baca',
-    },
-    {
-      'judul': 'Cara Sederhana Mencegah Mata Kering',
-      'desc': 'Tips ringan yang bisa kamu lakuin setiap hari.',
-      'image': 'images/maskot.png',
-      'kategori': 'Perawatan',
-      'waktu': '2 menit baca',
-    },
-    {
-      'judul': 'Cara Sederhana Mencegah Mata Kering',
-      'desc': 'Tips ringan yang bisa kamu lakuin setiap hari.',
-      'image': 'images/maskot.png',
-      'kategori': 'Perawatan',
-      'waktu': '2 menit baca',
-    },
-    {
-      'judul': 'Cara Sederhana Mencegah Mata Kering',
-      'desc': 'Tips ringan yang bisa kamu lakuin setiap hari.',
-      'image': 'images/maskot.png',
-      'kategori': 'Perawatan',
-      'waktu': '2 menit baca',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchArticles();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+        if (hasMore && !isLoading) {
+          fetchArticles();
+        }
+      }
+    });
+  }
+
+  Future<void> fetchArticles() async {
+    if (isLoading) return;
+    setState(() => isLoading = true);
+
+    try {
+      final result = await ApiService.getArticles(page: currentPage, perPage: 10);
+      
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          if (result['success']) {
+            final newArticles = List<Map<String, dynamic>>.from(result['data']);
+            if (newArticles.isEmpty) {
+              hasMore = false;
+            } else {
+              artikelList.addAll(newArticles);
+              currentPage++;
+            }
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
+  String _formatDate(String? dateString) {
+    if (dateString == null) return 'Baru';
+    try {
+      final date = DateTime.parse(dateString);
+      final now = DateTime.now();
+      final difference = now.difference(date);
+
+      if (difference.inMinutes < 60) {
+        return '${difference.inMinutes} menit lalu';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours} jam lalu';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays} hari lalu';
+      } else {
+        return '${date.day}/${date.month}/${date.year}';
+      }
+    } catch (e) {
+      return 'Baru';
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.white),
+      appBar: AppBar(backgroundColor: Colors.white, title: Text('Semua Artikel', style: TextStyle(color: Colors.black)), iconTheme: IconThemeData(color: Colors.black), elevation: 0),
       body: Padding(
-        padding: EdgeInsetsGeometry.symmetric(horizontal: 25, vertical: 20),
-        child: Center(
-          // ====================  SEARCH  NIH =====================
-          child: Column(
-            children: [
-              Container(
-                width: 350,
-                margin: EdgeInsets.symmetric(vertical: 20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hint: Text(
-                      'Cari  Mata disini...',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    prefixIcon: Icon(Icons.search),
-                    suffixIcon: PopupMenuButton<String>(
-                      icon: Icon(Icons.filter_alt, color: Colors.grey),
-                      onSelected: (value) {
-                        setState(() {
-                          var _selectedItem = value;
-                        });
-                      },
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'Terdekat',
-                          child: InkWell(onTap: () {}, child: Text('Terdekat')),
-                        ),
-                        PopupMenuItem(
-                          value: 'Terbaik',
-                          child: InkWell(onTap: () {}, child: Text('Terbaik')),
-                        ),
-                        PopupMenuItem(
-                          value: 'Buka Sekarang',
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.pushNamed(context, '/');
-                            },
-                            child: Text('Buka Sekarang'),
-                          ),
-                        ),
-                      ],
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+        padding: EdgeInsetsGeometry.symmetric(horizontal: 25, vertical: 10),
+        child: Column(
+          children: [
+            // Search Bar (Visual Only for now)
+            Container(
+              margin: EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Cari Artikel...',
+                  hintStyle: TextStyle(color: Colors.grey),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide.none,
                   ),
                 ),
               ),
+            ),
 
-              // ==================== LIST CARD NIH =========================
-              Expanded(
-                child: ListView.builder(
-                  itemCount: artikelList.length + 1,
+            // List Articles
+            Expanded(
+              child: artikelList.isEmpty && isLoading
+                ? Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                  itemCount: artikelList.length + (hasMore ? 1 : 0),
                   controller: _scrollController,
                   itemBuilder: (context, index) {
-                    // ================= FOOTER =================
                     if (index == artikelList.length) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Column(
-                          children: [
-                            Text(
-                              "Anda sudah melihat semua artikel",
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            SizedBox(height: 10),
-                            InkWell(
-                              onTap: () {
-                                _scrollController.animateTo(
-                                  0,
-                                  duration: Duration(milliseconds: 500),
-                                  curve: Curves.easeOut,
-                                );
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Icon(
-                                  Icons.arrow_upward_rounded,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        child: Center(child: CircularProgressIndicator()),
                       );
                     }
 
-                    // ============== CARD ===================
                     final artikel = artikelList[index];
                     return Container(
                       margin: EdgeInsets.symmetric(vertical: 10),
@@ -179,20 +142,42 @@ class _ArtikelnewState extends State<Artikelnew> {
                           ),
                         ],
                       ),
-                      child: Container(
-                        padding: EdgeInsets.all(12),
+                      child: InkWell(
+                        onTap: () {
+                           Navigator.pushNamed(
+                            context,
+                            '/isiartikel',
+                            arguments: artikel['id'],
+                          );
+                        },
                         child: Row(
                           children: [
                             // IMAGE
-                            ClipPath(
-                              child: Image.asset(
-                                artikel['image']!,
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
                                 width: 80,
                                 height: 80,
-
-                                fit: BoxFit.cover,
+                                color: Colors.grey[200],
+                                child: artikel['image_url'] != null
+                                    ? Image.network(
+                                        artikel['image_url'],
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Image.asset(
+                                            'images/maskot.png',
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
+                                      )
+                                    : Image.asset(
+                                        'images/maskot.png',
+                                        fit: BoxFit.cover,
+                                      ),
                               ),
                             ),
+
+                            SizedBox(width: 12),
 
                             // TEXT
                             Expanded(
@@ -200,7 +185,7 @@ class _ArtikelnewState extends State<Artikelnew> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    artikel['judul']!,
+                                    artikel['title'] ?? 'No Title',
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -212,7 +197,7 @@ class _ArtikelnewState extends State<Artikelnew> {
                                   SizedBox(height: 6),
 
                                   Text(
-                                    artikel['desc']!,
+                                    artikel['content'] ?? '',
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -232,12 +217,10 @@ class _ArtikelnewState extends State<Artikelnew> {
                                         ),
                                         decoration: BoxDecoration(
                                           color: Colors.blue.shade50,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
+                                          borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: Text(
-                                          artikel['kategori']!,
+                                          'Artikel',
                                           style: TextStyle(
                                             fontSize: 11,
                                             color: Colors.blue,
@@ -252,7 +235,7 @@ class _ArtikelnewState extends State<Artikelnew> {
                                       ),
                                       SizedBox(width: 4),
                                       Text(
-                                        artikel['waktu']!,
+                                        _formatDate(artikel['created_at']),
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: Colors.grey,
@@ -263,32 +246,14 @@ class _ArtikelnewState extends State<Artikelnew> {
                                 ],
                               ),
                             ),
-
-                            SizedBox(width: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.pushNamed(context, '/isiartikel');
-                                  },
-                                  child: Icon(
-                                    Icons.navigate_next_rounded,
-                                    size: 30,
-                                    color: Colors.blue.withOpacity(0.7),
-                                  ),
-                                ),
-                              ],
-                            ),
                           ],
                         ),
                       ),
                     );
                   },
                 ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

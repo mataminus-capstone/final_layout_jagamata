@@ -1,5 +1,5 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:jagamata/services/api_service.dart';
 
 class Profil extends StatefulWidget {
   const Profil({super.key});
@@ -9,400 +9,394 @@ class Profil extends StatefulWidget {
 }
 
 class _ProfilState extends State<Profil> {
-  String get $user => 'Rhiki';
-  String get $username => '@riki123';
-  String get $fullname => 'Rhiki Sulistiyo';
-  String get $email => 'rhikisulistiyo@gmail.com';
-  String? get $notelp => '0895339162828';
-  String? get $alamat => 'JL. Merpati No. 23, Surabaya';
+  bool isLoading = true;
+  Map<String, dynamic>? userData;
+
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    setState(() => isLoading = true);
+    final result = await ApiService.getCurrentUser();
+    if (result['success']) {
+      setState(() {
+        userData = result['data'];
+        _addressController.text = userData?['address'] ?? '';
+        _phoneController.text = userData?['phone_number'] ?? '';
+        isLoading = false;
+      });
+    } else {
+      setState(() => isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Gagal memuat profil')),
+        );
+      }
+    }
+  }
+
+  Future<void> _updateProfile() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(child: CircularProgressIndicator()),
+    );
+
+    final result = await ApiService.updateProfile(
+      address: _addressController.text,
+      phoneNumber: _phoneController.text,
+    );
+
+    if (mounted) Navigator.pop(context); // Close loading
+
+    if (result['success']) {
+      setState(() {
+        userData?['address'] = _addressController.text;
+        userData?['phone_number'] = _phoneController.text;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Profil berhasil diperbarui')),
+        );
+        Navigator.pop(context); // Close edit dialog
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Gagal memperbarui profil')),
+        );
+      }
+    }
+  }
+
+  void _showEditDialog() {
+    _addressController.text = userData?['address'] ?? '';
+    _phoneController.text = userData?['phone_number'] ?? '';
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Edit Profil"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _addressController,
+              decoration: InputDecoration(
+                labelText: "Alamat",
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 2,
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _phoneController,
+              decoration: InputDecoration(
+                labelText: "Nomor Telepon",
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.phone,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Batal"),
+          ),
+          ElevatedButton(
+            onPressed: _updateProfile,
+            child: Text("Simpan"),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _logout() {
+     ApiService.logout();
+     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    
+    final email = userData?['email'] ?? '-';
+    final userFullname = userData?['username'] ?? 'User'; // Adjust if you have a fullname field
+    final userUsername = userData?['username'] != null ? '@${userData!['username']}' : ''; 
+    final phone = userData?['phone_number'] ?? '-';
+    final address = userData?['address'] ?? '-';
+    final profilePic = userData?['profile_picture'];
+
     return Scaffold(
-     
       appBar: AppBar(
+        backgroundColor: Colors.blue[500],
         title: Row(
           children: [
             Expanded(
-              child: Center(
-                child: Text(
-                  $user,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+              child: Text(
+                "Profil",
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),
             InkWell(
               onTap: () {
                 Navigator.pushNamed(context, '/setting');
               },
-              child: Icon(Icons.settings),
+              child: Icon(Icons.settings, color: Colors.white),
             ),
           ],
         ),
       ),
       body: SingleChildScrollView(
-        
-        child:
-         Container(
-          color: Colors.white70,
-          child: Center(
-            child: Column(
-              children: [
-                
-                // Foto profil
-                SizedBox(height: 20),
-                Stack(
-                  children: [
-                    // Avatar utama
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundColor: Colors.grey[500],
-                      child: Icon(Icons.person, size: 60, color: Colors.white),
-                    ),
-
-                    // Ikon kamera di pojok kanan bawah
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          shape: BoxShape.circle,
-                        ),
-                        padding: EdgeInsets.all(6),
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: 20,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                  ],
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            // ===== BACKGROUND BIRU =====
+            Container(
+              height: 280,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue, Color.fromARGB(255, 24, 102, 167)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
 
-                // Nama dan info lainnya
-                Container(
-                  padding: EdgeInsets.all(20),
-                  margin: EdgeInsets.only(top: 40, bottom: 20),
-                  width: 400,
-                  
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color:Colors.black12,
-                        blurRadius: 3,
-
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.person),
-                          SizedBox(width: 10),
-                          Text("Data Pengguna"),
-                        ],
-                      ),
-
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 20),
-                          Text("Username", style: TextStyle(fontSize: 15)),
-                          TextField(
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              hintText: $username,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Text("Fullname", style: TextStyle(fontSize: 15)),
-                          TextField(
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              hintText: $fullname,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Text("Email", style: TextStyle(fontSize: 15)),
-                          TextField(
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              hintText: $email,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Text("No.HP", style: TextStyle(fontSize: 15)),
-                          TextField(
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              hintText: $notelp,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Text("Alamat", style: TextStyle(fontSize: 15)),
-                          TextField(
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              hintText: $alamat,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                        ],
-                      ),
-                      // Button Edit
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          side: BorderSide(color: Colors.blue),
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              elevation: 10,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              title: Text(
-                                "Edit Profile",
-                                textAlign: TextAlign.center,
-                              ),
-                              content: Container(
-                                width: 350,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    TextField(
-                                      decoration: InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                        labelText: 'Fullname',
-                                        hintText: $fullname,
-                                      ),
-                                    ),
-                                    SizedBox(height: 20),
-                                    TextField(
-                                      decoration: InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                        hintText: $notelp,
-                                        labelText: 'No.HP',
-                                      ),
-                                    ),
-                                    SizedBox(height: 20),
-                                    TextField(
-                                      decoration: InputDecoration(
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                        hintText: $alamat,
-                                        labelText: 'Alamat',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Batal"),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Lanjutkan"),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.edit, color: Colors.black),
-                            SizedBox(width: 15),
-                            Text("Ubah Profil"),
-                          ],
-                        ),
-                      ),
-                  
-                    ],
-                  ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
                 ),
-                SizedBox(height: 5),
+              ),
+            ),
 
-                // Password
-                Container(
-                  padding: EdgeInsets.all(20),
-                  margin: EdgeInsets.symmetric(vertical: 20),
-                  width: 400,
-                  decoration: BoxDecoration(
-                    
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 2,
-                       
+            // ===== TEXT DATA DIRI =====
+            Container(
+              margin: EdgeInsets.only(top: 380),
+              padding: EdgeInsets.only(left: 20),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        " Data Diri ",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                      SizedBox(width: 10),
+                      Icon(Icons.person, size: 30),
                     ],
                   ),
-                  child: Column(
+                  SizedBox(height: 20),
+                  Column(
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.lock),
-                          SizedBox(width: 10),
-                          Text("Password "),
-                        ],
+                      // ===== EMAIL =====
+                      Card(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        child: ListTile(
+                          leading: Icon(Icons.email),
+                          title: Text('Email'),
+                          subtitle: Text(email),
+                        ),
                       ),
+
+                      // ===== TELEPON =====
+                      Card(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        child: ListTile(
+                          leading: Icon(Icons.phone),
+                          title: Text('No. Telepon'),
+                          subtitle: Text(phone),
+                        ),
+                      ),
+
+                      // ===== ALAMAT =====
+                      Card(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
+                        child: ListTile(
+                          leading: Icon(Icons.home),
+                          title: Text('Alamat'),
+                          subtitle: Text(address),
+                        ),
+                      ),
+
                       SizedBox(height: 10),
-
-                      SizedBox(
-                        child: TextField(
-                          readOnly: true,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        margin: EdgeInsets.only(bottom: 10),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: BorderSide(color: Colors.blue),
+                            shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            hintText: '*',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            suffixIcon: InkWell(
-                              onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    shadowColor: Colors.grey,
-                                    elevation: 10,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    title: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [Text("Ubah Password Now")],
-                                    ),
-                                    content: Container(
-                                      width: 350,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          TextField(
-                                            obscureText: true,
-                                            decoration: InputDecoration(
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              hintText: 'Masukan password Lama',
-                                              labelText: 'Password Lama',
-                                            ),
-                                          ),
-                                          SizedBox(height: 20),
+                          ),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/history_detection');
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.history, color: Colors.blue),
+                              SizedBox(width: 15),
+                              Text(
+                                "Riwayat Deteksi",
+                                style: TextStyle(color: Colors.blue),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
 
-                                          TextField(
-                                            obscureText: true,
-                                            decoration: InputDecoration(
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              hintText: 'Masukan password Baru',
-                                              labelText: 'Password Baru',
-                                            ),
-                                          ),
-                                          SizedBox(height: 20),
-
-                                          TextField(
-                                            obscureText: true,
-                                            decoration: InputDecoration(
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              hintText:
-                                                  'Masukan Ulang Password',
-                                              labelText: 'Password Baru',
-                                            ),
-                                          ),
-                                          SizedBox(height: 20),
-                                        ],
-                                      ),
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: Text("Batal"),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: Text("Lanjutkan"),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                              child: Icon(Icons.edit_square),
+                      // ===== BUTTON EDIT =====
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            side: BorderSide(color: Colors.blue),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: _showEditDialog,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.edit, color: Colors.white),
+                              SizedBox(width: 15),
+                              Text(
+                                "Ubah Profil",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      // Spacing instead of password section
+                      SizedBox(height: 30),
+                      
+                      // ===== BUTTON LOGOUT =====
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        margin: EdgeInsets.only(bottom: 40),
+                        child: ElevatedButton.icon(
+                          onPressed: _logout,
+                          icon: Icon(Icons.logout_rounded, color: Colors.white),
+                          label: Text("Logout", style: TextStyle(color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            side: BorderSide(color: Colors.red),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 20),
                     ],
                   ),
-                ),
-
-                // button log-out
-                SizedBox(height: 15),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(Icons.logout_rounded, color: Colors.red),
-                  label: Text("Logout", style: TextStyle(color: Colors.red)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                ],
+              ),
+            ),
+            
+            // ===== KONTEN PUTIH =====
+            Container(
+              width: MediaQuery.of(context).size.width * 0.9,
+              margin: EdgeInsets.only(top: 150),
+              padding: EdgeInsets.only(top: 60, bottom: 50),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 5,
+                    blurRadius: 7,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    userFullname,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    userUsername,
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
-          ),
+
+            // ===== FOTO PROFIL (TENGAH BIRU & PUTIH) =====
+            Positioned(
+              top: 50,
+              child: CircleAvatar(
+                radius: 75,
+                backgroundColor: Colors.white,
+                child: CircleAvatar(
+                  radius: 70,
+                  backgroundColor: Colors.grey,
+                  backgroundImage: (profilePic != null && profilePic.isNotEmpty) 
+                      ? NetworkImage(profilePic) 
+                      : null,
+                  child: (profilePic == null || profilePic.isEmpty) 
+                      ? Icon(Icons.person, size: 60, color: Colors.white) 
+                      : null,
+                ),
+              ),
+            ),
+
+            Positioned(
+              top: 150,
+              right: MediaQuery.of(context).size.width/2 - 90, // Approximate positioning, originally hardcoded right: 170
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  shape: BoxShape.circle,
+                ),
+                padding: EdgeInsets.all(6),
+                child: InkWell(
+                  onTap: () {},
+                  child: Icon(
+                    Icons.camera_alt,
+                    size: 30,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

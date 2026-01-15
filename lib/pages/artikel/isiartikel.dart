@@ -95,10 +95,15 @@ class _IsiartikelState extends State<Isiartikel> {
                         width: double.infinity,
                         height: 220,
                         color: Color(0xFF80AFCC),
-                        child: Image.asset(
-                          'images/maskot.png',
-                          fit: BoxFit.cover,
-                        ),
+                        child: (articleData?['image_url'] != null && articleData!['image_url'].toString().isNotEmpty)
+                            ? Image.network(
+                                articleData!['image_url'],
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const SizedBox();
+                                },
+                              )
+                            : const SizedBox(),
                       ),
                       Container(
                         height: 220,
@@ -269,11 +274,22 @@ class _IsiartikelState extends State<Isiartikel> {
                                               width: 60,
                                               height: 60,
                                               color: Color(0xFF80AFCC),
-                                              child: Image.asset(
-                                                'images/maskot.png',
-                                                fit: BoxFit.cover,
+                                                child: article['image_url'] != null
+                                                    ? Image.network(
+                                                        article['image_url'],
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder: (context, error, stackTrace) {
+                                                          return Image.asset(
+                                                            'images/maskot.png',
+                                                            fit: BoxFit.cover,
+                                                          );
+                                                        },
+                                                      )
+                                                    : Image.asset(
+                                                        'images/maskot.png',
+                                                        fit: BoxFit.cover,
+                                                      ),
                                               ),
-                                            ),
                                           ),
                                           const SizedBox(height: 10),
                                           Text(

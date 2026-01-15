@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jagamata/services/api_service.dart';
 
 class KlinikMata extends StatefulWidget {
   const KlinikMata({super.key});
@@ -9,320 +10,217 @@ class KlinikMata extends StatefulWidget {
 
 class _KlinikMataState extends State<KlinikMata> {
   final ScrollController _scrollController = ScrollController();
-  List<Map<String, String>> klinikList = [
-    {
-      'image': 'images/klinik.jpg',
-      'title': 'KLINIK A',
-      'jalan': 'Jl. Merdeka No.1',
-      'jarak': '1.2 km',
-      'jam': '08.00 - 21.00',
-    },
-    {
-      'image': 'images/klinik.jpg',
-      'title': 'Klinik B',
-      'jalan': 'Jl. Ga Merdeka No.99',
-      'jarak': '9 km',
-      'jam': '09.00 - 20.00',
-    },
-    {
-      'image': 'images/klinik.jpg',
-      'title': 'Klinik C',
-      'jalan': 'Jl. Hampir Merdeka No.1/5',
-      'jarak': '4 km',
-      'jam': '08.00 - 18.00',
-    },
-    {
-      'image': 'images/klinik.jpg',
-      'title': 'Klinik D',
-      'jalan': 'Jl. Hampir Merdeka No.1/5',
-      'jarak': '4 km',
-      'jam': '08.00 - 18.00',
-    },
-    {
-      'image': 'images/klinik.jpg',
-      'title': 'Klinik E',
-      'jalan': 'Jl. Hampir Merdeka No.1/5',
-      'jarak': '4 km',
-      'jam': '08.00 - 18.00',
-    },
-  ];
+  List<dynamic> klinikList = [];
+  bool isLoading = true;
+  String errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchClinics();
+  }
+
+  Future<void> _fetchClinics() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+
+    final result = await ApiService.getClinics();
+
+    if (result['success']) {
+      setState(() {
+        klinikList = result['data'];
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        errorMessage = result['message'];
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    String? _selectedItem;
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: const Text('Rekomendasi Klinik'),
+      ),
       body: Center(
         child: Column(
           children: [
-            Text(
-              'Daftar Rekomendasi Klinik Mata',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue[900],
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Daftar Rekomendasi Klinik Mata',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue[900],
+                ),
               ),
             ),
 
-            //search
-            Container(
-              width: 350,
-              margin: EdgeInsets.symmetric(vertical: 20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hint: Text(
-                    'Cari Klinik Mata disini...',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  prefixIcon: Icon(Icons.search),
-                  suffixIcon: PopupMenuButton<String>(
-                    icon: Icon(Icons.filter_alt, color: Colors.grey),
-                    onSelected: (value) {
-                      setState(() {
-                        _selectedItem = value;
-                      });
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'Terdekat',
-                        child: InkWell(onTap: () {}, child: Text('Terdekat')),
-                      ),
-                      PopupMenuItem(
-                        value: 'Terbaik',
-                        child: InkWell(onTap: () {}, child: Text('Terbaik')),
-                      ),
-                      PopupMenuItem(
-                        value: 'Buka Sekarang',
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(context, '/');
-                          },
-                          child: Text('Buka Sekarang'),
-                        ),
-                      ),
+            if (isLoading)
+              const Expanded(child: Center(child: CircularProgressIndicator()))
+            else if (errorMessage.isNotEmpty)
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(errorMessage),
+                      ElevatedButton(
+                        onPressed: _fetchClinics,
+                        child: const Text('Coba Lagi'),
+                      )
                     ],
                   ),
-                  // Icon(Icons.filter_alt, color: Colors.grey)
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
+                ),
+              )
+            else if (klinikList.isEmpty)
+              const Expanded(
+                child: Center(
+                  child: Text('Tidak ada klinik ditemukan untuk lokasi Anda'),
+                ),
+              )
+            else
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ListView.builder(
+                    itemCount: klinikList.length + 1,
+                    controller: _scrollController,
+                    itemBuilder: (context, index) {
+                      // Footer
+                      if (index == klinikList.length) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Column(
+                            children: [
+                              const Text(
+                                "Anda telah mencapai page akhir nih",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                              const SizedBox(height: 10),
+                              InkWell(
+                                onTap: () {
+                                  _scrollController.animateTo(
+                                    0,
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.easeOut,
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Icon(
+                                    Icons.arrow_upward_rounded,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      final klinik = klinikList[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Gambar Check
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: klinik['image_url'] != null
+                                      ? Image.network(
+                                          klinik['image_url'],
+                                          width: 80,
+                                          height: 80,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              Container(
+                                            width: 80,
+                                            height: 80,
+                                            color: Colors.grey[200],
+                                            child: const Icon(Icons.image_not_supported),
+                                          ),
+                                        )
+                                      : Container(
+                                          width: 80,
+                                          height: 80,
+                                          color: Colors.grey[200],
+                                          child: const Icon(Icons.image),
+                                        ),
+                                ),
+                                const SizedBox(width: 12),
+
+                                // Text Area
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        klinik['name'] ?? 'Klinik',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        klinik['address'] ?? '-',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey[600],
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.phone,
+                                            color: Colors.green,
+                                            size: 14,
+                                          ),
+                                          const SizedBox(width: 2),
+                                          Text(
+                                            klinik['phone_number'] ?? '-',
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
-            ),
-
-            /// Saran jika bisa yaa , akan menampilkan ini jika filter tidak aktif maupun aktif
-
-            // Column(
-            //   children: [
-            //     Icon(Icons.search_off, size: 60, color: Colors.grey),
-            //     Text('Klinik tidak ditemukan'),
-            //   ],
-            // ),
-
-            // Column(
-            //   children: [
-            //     Icon(Icons.search, size: 60, color: Colors.grey),
-            //     SizedBox(height: 10),
-            //     Text(
-            //       'Menampilkan 3 klinik',
-            //     ),
-            //   ],
-            // ),
-
-            // =====================================================
-
-            
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(24.0),
-                child: ListView.builder(
-                  itemCount: klinikList.length + 1,
-                  controller: _scrollController,
-                  itemBuilder: (context, index) {
-                    // ================= FOOTER =================
-                    if (index == klinikList.length) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Column(
-                          children: [
-                            Text(
-                              "Anda telah mencapai page akhir nih",
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            SizedBox(height: 10),
-                            InkWell(
-                              onTap: () {
-                                _scrollController.animateTo(
-                                  0,
-                                  duration: Duration(milliseconds: 500),
-                                  curve: Curves.easeOut,
-                                );
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Icon(
-                                  Icons.arrow_upward_rounded,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    // ============== CARD ===================
-                    final artikel = klinikList[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Card(
-                        elevation: 10, // <-- INI
-                        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Gambar Obat
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.asset(
-                                  artikel['image']!,
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              SizedBox(width: 12),
-                      
-                              // Text Area
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Nama Obat
-                                    Text(
-                                      artikel['title']!,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                      
-                                    SizedBox(height: 4),
-                      
-                                    // Fungsi
-                                    Text(
-                                      artikel['jalan']!,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey[600],
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                      
-                                    SizedBox(height: 4),
-                      
-                                    Row(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.location_on,
-                                              color: Colors.red,
-                                              size: 18,
-                                            ),
-                                            SizedBox(width: 2),
-                                            Text(
-                                              artikel['jarak']!,
-                                              style: TextStyle(
-                                                color: Colors.black54,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      SizedBox(width: 15,),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.access_time_rounded,
-                                              color: Colors.black,
-                                              size: 18,
-                                            ),
-                                            SizedBox(width: 2),
-                                            Text(
-                                              artikel['jam']!,
-                                              style: TextStyle(
-                                                color: Colors.black54,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: Colors.blue,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.call,
-                                      color: Colors.white,
-                                      size: 15,
-                                    ),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      'Telepon',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                      
-                              //next
-                              //    Row(
-                              //      children: [
-                              //        Icon(
-                              //          Icons.navigate_next,
-                              //          size: 30,
-                              //          color: Colors.grey,
-                              //        ),
-                              //      ],
-                              //    ),
-                              //
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
           ],
         ),
       ),

@@ -1,6 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiService {
   static const String prodBaseUrl = 'https://jagamata.leapcell.app';
@@ -214,6 +216,7 @@ class ApiService {
               'id': article['id'],
               'title': article['title'] ?? 'No Title',
               'content': article['content'] ?? 'No Content',
+              'image_url': article['image_url'],
               'author': article['author'] ?? {'id': 0, 'username': 'Unknown'},
               'created_at': article['created_at'] ?? '',
               'updated_at': article['updated_at'] ?? '',
@@ -355,6 +358,130 @@ class ApiService {
         return {'success': true, 'data': data['data']};
       } else {
         return {'success': false, 'message': 'Failed to get user'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error: ${e.toString()}'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateProfile({
+    required String address,
+    required String phoneNumber,
+  }) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/api/auth/me'),
+        headers: _getHeaders(authenticated: true),
+        body: jsonEncode({
+          'address': address,
+          'phone_number': phoneNumber,
+        }),
+      ).timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (userData != null) {
+          userData!['address'] = address;
+          userData!['phone_number'] = phoneNumber;
+        }
+        return {'success': true, 'data': data['data']};
+      } else {
+        final data = jsonDecode(response.body);
+        return {'success': false, 'message': data['message'] ?? 'Update failed'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error: ${e.toString()}'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> getClinics() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/clinics'),
+        headers: _getHeaders(authenticated: true),
+      ).timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data['data']};
+      } else {
+        final data = jsonDecode(response.body);
+        return {'success': false, 'message': data['message'] ?? 'Failed to load clinics'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error: ${e.toString()}'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> detectDisease(XFile imageFile) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/api/detection/predict'),
+      );
+      
+      request.headers.addAll(_getHeaders(authenticated: true));
+      
+      // Remove Content-Type from headers as MultipartRequest sets it automatically
+      request.headers.remove('Content-Type');
+
+      if (kIsWeb) {
+         // On web, read bytes
+         final bytes = await imageFile.readAsBytes();
+         request.files.add(
+           http.MultipartFile.fromBytes(
+             'image', 
+             bytes,
+             filename: imageFile.name
+           ),
+         );
+      } else {
+         // On mobile, we can also use bytes to be safe, or fromPath
+         // Using fromPath is better for large files on mobile to avoid loading all into memory,
+         // but fromBytes is safer for cross-platform.
+         // Let's use fromBytes for consistency if file is not huge, 
+         // OR check kIsWeb.
+         
+         // safely use fromFilePath on mobile
+         request.files.add(
+            await http.MultipartFile.fromPath('image', imageFile.path),
+         );
+      }
+
+      final streamedResponse = await request.send().timeout(timeout);
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print('[DEBUG] Detect response status: ${response.statusCode}');
+      print('[DEBUG] Detect response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data['data']};
+      } else {
+        final data = jsonDecode(response.body);
+        return {'success': false, 'message': data['message'] ?? 'Deteksi gagal'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error: ${e.toString()}'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> getDetectionHistory({
+    int page = 1,
+    int perPage = 20,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/detection/history?page=$page&per_page=$perPage'),
+        headers: _getHeaders(authenticated: true),
+      ).timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data['data']};
+      } else {
+        final data = jsonDecode(response.body);
+        return {'success': false, 'message': data['message'] ?? 'Gagal memuat riwayat'};
       }
     } catch (e) {
       return {'success': false, 'message': 'Error: ${e.toString()}'};
