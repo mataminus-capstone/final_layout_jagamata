@@ -113,18 +113,33 @@ class _HomopageState extends State<Homopage> {
                       ),
                     ],
                   ),
-                  InkWell(
-                    onTap: () => Navigator.pushNamed(context, '/profil'),
-                    child: CircleAvatar(
-                      radius: 24,
-                      backgroundImage: profilePicUrl != null
-                          ? NetworkImage(profilePicUrl)
-                          : null,
-                      backgroundColor: Colors.grey[200],
-                      child: profilePicUrl == null
-                          ? Icon(Icons.person, color: kDarkBlue)
-                          : null,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: Icon(Icons.notifications_outlined, color: kDarkBlue),
+                          onPressed: () => Navigator.pushNamed(context, '/notif'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      InkWell(
+                        onTap: () => Navigator.pushNamed(context, '/profil'),
+                        child: CircleAvatar(
+                          radius: 24,
+                          backgroundImage: profilePicUrl != null
+                              ? NetworkImage(profilePicUrl)
+                              : null,
+                          backgroundColor: Colors.grey[200],
+                          child: profilePicUrl == null
+                              ? Icon(Icons.person, color: kDarkBlue)
+                              : null,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -301,72 +316,81 @@ class _HomopageState extends State<Homopage> {
                   itemCount: artikelList.length,
                   itemBuilder: (context, index) {
                     final artikel = artikelList[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey[100]!),
-                        boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                      ),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: artikel['image_url'] != null
-                                ? Image.network(
-                                    artikel['image_url'],
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (ctx, err, stack) => Container(
+                    return InkWell(
+                      onTap: () {
+                         Navigator.pushNamed(
+                          context, 
+                          '/isiartikel',
+                          arguments: artikel['id'],
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey[100]!),
+                          boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                        ),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: artikel['image_url'] != null
+                                  ? Image.network(
+                                      artikel['image_url'],
+                                      width: 80,
+                                      height: 80,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (ctx, err, stack) => Container(
+                                        width: 80, height: 80, color: Colors.grey[200], child: const Icon(Icons.image),
+                                      ),
+                                    )
+                                  : Container(
                                       width: 80, height: 80, color: Colors.grey[200], child: const Icon(Icons.image),
                                     ),
-                                  )
-                                : Container(
-                                    width: 80, height: 80, color: Colors.grey[200], child: const Icon(Icons.image),
-                                  ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  artikel['title'] ?? 'No Title',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: kDarkBlue,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Icon(Icons.access_time, size: 12, color: Colors.grey[400]),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      _formatDate(artikel['created_at']),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[400],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    artikel['title'] ?? 'No Title',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: kDarkBlue,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.access_time, size: 12, color: Colors.grey[400]),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _formatDate(artikel['created_at']),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[400],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
