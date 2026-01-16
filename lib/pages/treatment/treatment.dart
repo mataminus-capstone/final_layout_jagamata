@@ -189,8 +189,21 @@ class _TreatmentPageState extends State<TreatmentPage> {
                       color: Colors.grey[500],
                       height: 1.4,
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+              SizedBox(height: 30),
+
+              // Kotak 2 - Teknik Akupresur
+              PressableCard(
+                //icon pijat wajah
+                icon: Icons.touch_app_rounded,
+                title: 'Teknik Akupresur',
+                description:
+                    'Pijatan lembut pada titik-titik diarea sekitar mata.',
+                onTap: () {
+                  Navigator.pushNamed(context, '/acupressure');
+                },
               ),
             ),
             Icon(Icons.chevron_right_rounded, color: Colors.grey[400]),
