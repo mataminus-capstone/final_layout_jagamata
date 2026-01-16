@@ -365,24 +365,55 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> updateProfile({
-    required String address,
-    required String phoneNumber,
+    String? username,
+    String? address,
+    String? phoneNumber,
+    XFile? imageFile,
   }) async {
     try {
-      final response = await http.put(
+      var request = http.MultipartRequest(
+        'PUT',
         Uri.parse('$baseUrl/api/auth/me'),
-        headers: _getHeaders(authenticated: true),
-        body: jsonEncode({
-          'address': address,
-          'phone_number': phoneNumber,
-        }),
-      ).timeout(timeout);
+      );
+
+      request.headers.addAll(_getHeaders(authenticated: true));
+      // Remove Content-Type, let MultipartRequest handle it
+      request.headers.remove('Content-Type');
+
+      if (username != null) request.fields['username'] = username;
+      if (address != null) request.fields['address'] = address;
+      if (phoneNumber != null) request.fields['phone_number'] = phoneNumber;
+
+      if (imageFile != null) {
+        if (kIsWeb) {
+          final bytes = await imageFile.readAsBytes();
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'profile_picture',
+              bytes,
+              filename: imageFile.name,
+            ),
+          );
+        } else {
+          request.files.add(
+            await http.MultipartFile.fromPath('profile_picture', imageFile.path),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send().timeout(timeout);
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (userData != null) {
-          userData!['address'] = address;
-          userData!['phone_number'] = phoneNumber;
+          // Update local cache
+          if (username != null) userData!['username'] = username;
+          if (address != null) userData!['address'] = address;
+          if (phoneNumber != null) userData!['phone_number'] = phoneNumber;
+          if (data['data']['profile_picture'] != null) {
+             userData!['profile_picture'] = data['data']['profile_picture'];
+          }
         }
         return {'success': true, 'data': data['data']};
       } else {
