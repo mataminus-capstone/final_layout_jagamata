@@ -6,7 +6,7 @@ class CompleteProfilePage extends StatefulWidget {
 
   @override
   State<CompleteProfilePage> createState() => _CompleteProfilePageState();
-}
+} 
 
 class _CompleteProfilePageState extends State<CompleteProfilePage> {
   final TextEditingController _addressController = TextEditingController();

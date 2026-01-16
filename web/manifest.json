@@ -1,11 +1,11 @@
 {
-    "name": "jagamata",
-    "short_name": "jagamata",
+    "name": "Jaga Mata",
+    "short_name": "Jaga Mata",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Aplikasi pemantau kesehatan mata berbasis kecerdasan buatan",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

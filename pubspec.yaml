@@ -77,6 +77,10 @@ flutter:
     - images/tretmen.jpg
     - images/obat.jpg
     - images/klinik.jpg
+    - images/googleSymbol.png
+    - images/logo/logo-no-text.png
+    - images/logo/logo-with-text.png
+    - images/docter.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

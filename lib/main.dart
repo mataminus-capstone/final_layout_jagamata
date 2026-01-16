@@ -9,11 +9,11 @@ import 'package:jagamata/pages/chatbot/chatbot.dart';
 import 'package:jagamata/pages/deteksi/deteksi.dart';
 import 'package:jagamata/pages/homepage.dart';
 import 'package:jagamata/pages/loginpage.dart';
-import 'package:jagamata/pages/profil/profil1.dart';
 import 'package:jagamata/pages/profil/profile.dart';
 import 'package:jagamata/pages/profil/setting.dart';
 import 'package:jagamata/pages/registerpage.dart';
 import 'package:jagamata/pages/notifikasi.dart';
+import 'package:jagamata/pages/search_results_page.dart';
 import 'package:jagamata/pages/rekomendasi/klinik.dart';
 import 'package:jagamata/pages/rekomendasi/obat.dart';
 import 'package:jagamata/pages/rekomendasi/rekomendasi.dart';
@@ -23,6 +23,7 @@ import 'package:jagamata/pages/treatment/treatment.dart';
 import 'package:jagamata/services/api_service.dart';
 import 'package:jagamata/pages/complete_profile_page.dart';
 import 'package:jagamata/pages/profil/history_detection_page.dart';
+import 'package:jagamata/pages/loading_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,8 +44,9 @@ class JagaMata extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: RegisterPage(),
+      home: const SplashScreen(),
       routes: {
+        '/loading': (context) => const LoadingPage(),
         '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
         '/home': (context) => Homopage(),
@@ -58,7 +60,6 @@ class JagaMata extends StatelessWidget {
         '/setting': (context) => Setting(),
         '/artikel': (context) => Artikel(),
         '/eyeExercise': (context) => Coba(),
-        '/profil1': (context) => Profil1(),
         '/senammata': (context) => SenamMata(),
         '/senameyes': (context) => EyeExercisePage(),
         '/obat' : (context) => Obat(),
@@ -66,7 +67,41 @@ class JagaMata extends StatelessWidget {
         '/isiartikel' : (context) => Isiartikel(),
         '/complete-profile': (context) => CompleteProfilePage(),
         '/history_detection': (context) => HistoryDetectionPage(),
+        '/search_results': (context) => SearchResultsPage(
+          searchQuery: ModalRoute.of(context)!.settings.arguments as String,
+        ),
       },
     );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _navigateToNext();
+  }
+
+  _navigateToNext() async {
+    await Future.delayed(const Duration(seconds: 3)); // Wait for 3 seconds
+    if (mounted) {
+      // Check if user is logged in (simplified check based on main() logic, 
+      // ideally we check token validity properly here or in main)
+      // For now, default to RegisterPage as per original code, or LoginPage.
+      // The original code set 'home: RegisterPage()'.
+      Navigator.pushReplacementNamed(context, '/login'); 
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const LoadingPage(); // Reuse the LoadingPage design
   }
 }
