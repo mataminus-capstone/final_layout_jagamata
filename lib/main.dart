@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart'; // Import Wajib untuk Kamera
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Import halaman-halaman aplikasi
+import 'package:jagamata/pages/treatment/acupressure_page.dart';
 import 'package:jagamata/pages/PERCOBAAN/COBA.dart';
 import 'package:jagamata/pages/artikel/artikel.dart';
 import 'package:jagamata/pages/artikel/artikelnew.dart';
@@ -25,9 +28,23 @@ import 'package:jagamata/pages/complete_profile_page.dart';
 import 'package:jagamata/pages/profil/history_detection_page.dart';
 import 'package:jagamata/pages/loading_page.dart';
 
+// ==============================================================================
+// 1. DEKLARASI GLOBAL (PENTING: Harus di luar void main)
+// ==============================================================================
+List<CameraDescription> cameras = [];
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // ============================================================================
+  // 2. INISIALISASI KAMERA (PENTING: Diisi sebelum aplikasi jalan)
+  // ============================================================================
+  try {
+    cameras = await availableCameras();
+  } on CameraException catch (e) {
+    debugPrint('Error Camera: $e.code\nError Message: $e.message');
+  }
+
   final prefs = await SharedPreferences.getInstance();
   final savedToken = prefs.getString('jwt_token');
   if (savedToken != null) {
@@ -70,6 +87,11 @@ class JagaMata extends StatelessWidget {
         '/search_results': (context) => SearchResultsPage(
           searchQuery: ModalRoute.of(context)!.settings.arguments as String,
         ),
+        
+        // ======================================================================
+        // 3. PEMANGGILAN ROUTE (Sekarang sudah tidak merah)
+        // ======================================================================
+        '/acupressure': (context) => AcupressurePage(cameras: cameras),
       },
     );
   }
@@ -90,18 +112,15 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   _navigateToNext() async {
-    await Future.delayed(const Duration(seconds: 3)); // Wait for 3 seconds
+    await Future.delayed(const Duration(seconds: 3)); 
     if (mounted) {
-      // Check if user is logged in (simplified check based on main() logic, 
-      // ideally we check token validity properly here or in main)
-      // For now, default to RegisterPage as per original code, or LoginPage.
-      // The original code set 'home: RegisterPage()'.
+      // Mengarahkan ke Login (atau bisa diubah logicnya sesuai kebutuhan token)
       Navigator.pushReplacementNamed(context, '/login'); 
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return const LoadingPage(); // Reuse the LoadingPage design
+    return const LoadingPage(); 
   }
 }

@@ -144,7 +144,9 @@ class _TreatmentPageState extends State<TreatmentPage> {
                 title: 'Teknik Akupresur',
                 description:
                     'Pijatan lembut pada titik-titik diarea sekitar mata.',
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, '/acupressure');
+                },
               ),
 
               SizedBox(height: 25),
