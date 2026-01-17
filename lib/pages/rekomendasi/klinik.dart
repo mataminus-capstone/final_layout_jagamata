@@ -14,6 +14,11 @@ class _KlinikMataState extends State<KlinikMata> {
   bool isLoading = true;
   String errorMessage = '';
 
+  // Brand Colors
+  final Color kDarkBlue = const Color(0xFF11417f);
+  final Color kLightBlue = const Color(0xFF14b4ef);
+  final Color kTosca = const Color(0xFFa2c38e);
+
   @override
   void initState() {
     super.initState();
@@ -44,26 +49,50 @@ class _KlinikMataState extends State<KlinikMata> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Rekomendasi Klinik'),
+        title: Text('Rekomendasi Klinik', style: TextStyle(color: kDarkBlue, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(color: kDarkBlue),
+        elevation: 0,
+        centerTitle: true,
       ),
       body: Center(
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(vertical: 10),
               child: Text(
                 'Daftar Rekomendasi Klinik Mata',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue[900],
+                  color: kDarkBlue,
+                ),
+              ),
+            ),
+            
+            // Search Bar (Visual consistency)
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Cari Klinik...',
+                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  icon: Icon(Icons.search, color: Colors.grey[400]),
                 ),
               ),
             ),
 
             if (isLoading)
-              const Expanded(child: Center(child: CircularProgressIndicator()))
+              Expanded(child: Center(child: CircularProgressIndicator(color: kDarkBlue)))
             else if (errorMessage.isNotEmpty)
               Expanded(
                 child: Center(
@@ -75,6 +104,7 @@ class _KlinikMataState extends State<KlinikMata> {
                       Text(errorMessage),
                       ElevatedButton(
                         onPressed: _fetchClinics,
+                        style: ElevatedButton.styleFrom(backgroundColor: kDarkBlue),
                         child: const Text('Coba Lagi'),
                       )
                     ],
@@ -82,15 +112,15 @@ class _KlinikMataState extends State<KlinikMata> {
                 ),
               )
             else if (klinikList.isEmpty)
-              const Expanded(
+              Expanded(
                 child: Center(
-                  child: Text('Tidak ada klinik ditemukan untuk lokasi Anda'),
+                  child: Text('Tidak ada klinik ditemukan untuk lokasi Anda', style: TextStyle(color: Colors.grey)),
                 ),
               )
             else
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: ListView.builder(
                     itemCount: klinikList.length + 1,
                     controller: _scrollController,
@@ -117,7 +147,7 @@ class _KlinikMataState extends State<KlinikMata> {
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: Colors.blue,
+                                    color: kDarkBlue,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: const Icon(
@@ -132,89 +162,105 @@ class _KlinikMataState extends State<KlinikMata> {
                       }
 
                       final klinik = klinikList[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Card(
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // Gambar Check
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: klinik['image_url'] != null
-                                      ? Image.network(
-                                          klinik['image_url'],
-                                          width: 80,
-                                          height: 80,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) =>
-                                              Container(
-                                            width: 80,
-                                            height: 80,
-                                            color: Colors.grey[200],
-                                            child: const Icon(Icons.image_not_supported),
-                                          ),
-                                        )
-                                      : Container(
-                                          width: 80,
-                                          height: 80,
-                                          color: Colors.grey[200],
-                                          child: const Icon(Icons.image),
-                                        ),
-                                ),
-                                const SizedBox(width: 12),
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey[100]!),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Gambar Check
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: klinik['image_url'] != null
+                                  ? Image.network(
+                                      klinik['image_url'],
+                                      width: 80,
+                                      height: 80,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          Container(
+                                        width: 80,
+                                        height: 80,
+                                        color: Colors.grey[200],
+                                        child: const Icon(Icons.image_not_supported),
+                                      ),
+                                    )
+                                  : Container(
+                                      width: 80,
+                                      height: 80,
+                                      color: Colors.grey[200],
+                                      child: const Icon(Icons.image),
+                                    ),
+                            ),
+                            const SizedBox(width: 16),
 
-                                // Text Area
-                                Expanded(
-                                  child: Column(
+                            // Text Area
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    klinik['name'] ?? 'Klinik',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: kDarkBlue,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        klinik['name'] ?? 'Klinik',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        klinik['address'] ?? '-',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.grey[600],
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.phone,
-                                            color: Colors.green,
-                                            size: 14,
+                                      Icon(Icons.location_on, size: 14, color: Colors.grey[400]),
+                                      SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          klinik['address'] ?? '-',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey[600],
                                           ),
-                                          const SizedBox(width: 2),
-                                          Text(
-                                            klinik['phone_number'] ?? '-',
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ],
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.phone,
+                                        color: Colors.green,
+                                        size: 14,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        klinik['phone_number'] ?? '-',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey[800],
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       );
                     },

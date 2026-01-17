@@ -519,6 +519,51 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> getMedicines({
+    String? category,
+    int page = 1,
+    int perPage = 20,
+  }) async {
+    try {
+      String url = '$baseUrl/api/medicines?page=$page&per_page=$perPage';
+      if (category != null && category.isNotEmpty) {
+        url += '&category=${Uri.encodeComponent(category)}';
+      }
+      
+      final response = await http.get(
+        Uri.parse(url),
+        headers: _getHeaders(authenticated: true),
+      ).timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data['data']};
+      } else {
+        final data = jsonDecode(response.body);
+        return {'success': false, 'message': data['message'] ?? 'Gagal memuat obat'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error: ${e.toString()}'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> getCategories() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/categories'),
+        headers: _getHeaders(authenticated: true),
+      ).timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data['data']};
+      } else {
+        return {'success': false, 'message': 'Gagal memuat kategori'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error: ${e.toString()}'};
+    }
+  }
   static void logout() {
     clearToken();
   }

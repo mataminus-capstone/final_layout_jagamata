@@ -122,9 +122,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
               description: "Pijatan lembut pada titik-titik di area sekitar mata.",
               icon: Icons.touch_app_rounded,
               color: kTosca,
-              onTap: () {
-                // To be implemented
-              },
+              onTap: () => Navigator.pushNamed(context, '/acupressure'),
             ),
             
             const SizedBox(height: 40),
@@ -189,23 +187,11 @@ class _TreatmentPageState extends State<TreatmentPage> {
                       color: Colors.grey[500],
                       height: 1.4,
                     ),
-                  ],
+                  ),
+                ],
                 ),
               ),
-              SizedBox(height: 30),
 
-              // Kotak 2 - Teknik Akupresur
-              PressableCard(
-                //icon pijat wajah
-                icon: Icons.touch_app_rounded,
-                title: 'Teknik Akupresur',
-                description:
-                    'Pijatan lembut pada titik-titik diarea sekitar mata.',
-                onTap: () {
-                  Navigator.pushNamed(context, '/acupressure');
-                },
-              ),
-            ),
             Icon(Icons.chevron_right_rounded, color: Colors.grey[400]),
           ],
         ),

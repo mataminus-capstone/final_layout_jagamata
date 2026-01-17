@@ -257,6 +257,7 @@ class _DeteksiState extends State<Deteksi> {
                   height: 150,
                   width: 150,
                   fit: BoxFit.cover,
+                  errorBuilder: (ctx, err, stack) => Icon(Icons.broken_image, size: 100, color: Colors.grey),
                 ),
               ),
             ),
@@ -270,6 +271,89 @@ class _DeteksiState extends State<Deteksi> {
                     _buildResultItem("Penanganan & Obat", data['handling'], Icons.medication),
                     SizedBox(height: 15),
                     _buildResultItem("Solusi & Edukasi", data['solution'], Icons.healing),
+                    SizedBox(height: 15),
+                    Divider(),
+                    SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Rekomendasi Obat",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    // Fetch medicines based on diagnosis category
+                    FutureBuilder<Map<String, dynamic>>(
+                      future: ApiService.getMedicines(category: data['diagnosis']),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child: Padding(padding: EdgeInsets.all(10), child: CircularProgressIndicator()));
+                        }
+                        if (snapshot.hasError || !snapshot.hasData || !(snapshot.data!['success'] ?? false)) {
+                          return Text("Tidak ada rekomendasi obat khusus.");
+                        }
+
+                        final medicines = snapshot.data!['data'] as List;
+                        if (medicines.isEmpty) {
+                          return Text("Tidak ada rekomendasi obat ditemukan untuk kondisi ini.");
+                        }
+
+                        return SizedBox(
+                          height: 160,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: medicines.length,
+                            itemBuilder: (context, index) {
+                              final med = medicines[index];
+                              return Container(
+                                width: 120,
+                                margin: EdgeInsets.only(right: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.grey.shade200),
+                                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+                                      child: Image.network(
+                                        med['image_url'] ?? '',
+                                        height: 80,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                            Container(height: 80, color: Colors.grey[200], child: Icon(Icons.image_not_supported)),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            med['name'] ?? 'Obat',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                          ),
+                                          Text(
+                                            med['price'] != null ? 'Rp ${med['price']}' : '',
+                                            style: TextStyle(fontSize: 10, color: Colors.orange[800]),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
