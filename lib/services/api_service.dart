@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiService {
-  static const String prodBaseUrl = 'https://jagamata.leapcell.app';
+  static const String prodBaseUrl = 'https://jagamata.web.id';
   static const String devBaseUrl = 'http://localhost:5000';
   
   // development / production
@@ -342,6 +342,26 @@ class ApiService {
         'success': false,
         'response': errorMsg,
       };
+    }
+  }
+
+  static Future<Map<String, dynamic>> submitFeedback(String content) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/feedback/'),
+        headers: _getHeaders(authenticated: true),
+        body: jsonEncode({'content': content}),
+      ).timeout(timeout);
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data['data'], 'message': data['message']};
+      } else {
+        final data = jsonDecode(response.body);
+        return {'success': false, 'message': data['message'] ?? 'Gagal mengirim feedback'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error: ${e.toString()}'};
     }
   }
 

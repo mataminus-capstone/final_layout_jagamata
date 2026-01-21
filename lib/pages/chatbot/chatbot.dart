@@ -90,14 +90,18 @@ class _ChatbotState extends State<Chatbot> {
     int characterIndex = 0;
     
     _typingTimer?.cancel();
-    _typingTimer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
+    _typingTimer?.cancel();
+    _typingTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       if (characterIndex < fullText.length) {
         setState(() {
-          _currentTypingText += fullText[characterIndex];
+          // Append up to 3 characters at once to speed it up significantly
+          int end = (characterIndex + 3 < fullText.length) ? characterIndex + 3 : fullText.length;
+          _currentTypingText += fullText.substring(characterIndex, end);
+          characterIndex = end;
+          
           messages[messageIndex]['text'] = _currentTypingText;
           messages[messageIndex]['isTyping'] = true; // Still typing
         });
-        characterIndex++;
         _scrollToBottom(); // Keep scrolling to bottom as text grows
       } else {
         setState(() {

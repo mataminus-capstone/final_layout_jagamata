@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jagamata/services/api_service.dart';
+import 'package:jagamata/pages/profil/feedback_page.dart';
 
 class Profil extends StatefulWidget {
   const Profil({super.key});
@@ -182,6 +183,27 @@ class _ProfilState extends State<Profil> {
                           onPressed: () => Navigator.pushNamed(context, '/history_detection'),
                           icon: const Icon(Icons.history, color: Colors.white),
                           label: const Text("Riwayat Deteksi", style: TextStyle(color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kLightBlue,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const FeedbackPage()),
+                          ),
+                          icon: const Icon(Icons.feedback, color: Colors.white),
+                          label: const Text("Beri Masukan", style: TextStyle(color: Colors.white)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kLightBlue,
                             padding: const EdgeInsets.symmetric(vertical: 16),
