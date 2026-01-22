@@ -336,6 +336,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 color: kLightBlue,
                                 fontWeight: FontWeight.bold,
                               ),
+                              key: Key('already_have_account')// for testing
                             ),
                           ),
                         ],

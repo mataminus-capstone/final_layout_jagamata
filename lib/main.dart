@@ -39,11 +39,13 @@ void main() async {
   // ============================================================================
   // 2. INISIALISASI KAMERA (PENTING: Diisi sebelum aplikasi jalan)
   // ============================================================================
-  try {
-    cameras = await availableCameras();
-  } on CameraException catch (e) {
-    debugPrint('Error Camera: $e.code\nError Message: $e.message');
-  }
+  
+  // Mendapatkan daftar kamera yang tersedia
+  // try {
+  //   cameras = await availableCameras();
+  // } on CameraException catch (e) {
+  //   debugPrint('Error Camera: $e.code\nError Message: $e.message');
+  // }
 
   final prefs = await SharedPreferences.getInstance();
   final savedToken = prefs.getString('jwt_token');

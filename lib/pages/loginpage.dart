@@ -194,6 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     // Email Field
                     TextField(
+                      key: const Key('login_email'),
                       controller: emailController,
                       decoration: InputDecoration(
                         labelText: 'Email',
@@ -214,6 +215,7 @@ class _LoginPageState extends State<LoginPage> {
                     
                     // Password Field
                     TextField(
+                      key: const Key('login_password'),
                       controller: passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
@@ -235,6 +237,7 @@ class _LoginPageState extends State<LoginPage> {
                     
                     // Login Button
                     ElevatedButton(
+                      key: const Key('login_button'),// for testing
                       onPressed: isLoading ? null : handleLogin,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
