@@ -1,8 +1,8 @@
+// Lokasi: lib/pages/deteksi/camera_page.dart
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:jagamata/services/camera_service.dart';
 import 'package:jagamata/widgets/eye_overlay.dart';
-
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key});
@@ -14,14 +14,13 @@ class CameraPage extends StatefulWidget {
 class _CameraPageState extends State<CameraPage> {
   final CameraService _cameraService = CameraService();
   bool ready = false;
+  String? errorMessage;
 
   @override
   void initState() {
     super.initState();
     initCamera();
   }
-
-  String? errorMessage;
 
   Future<void> initCamera() async {
     try {
@@ -46,42 +45,42 @@ class _CameraPageState extends State<CameraPage> {
   Widget build(BuildContext context) {
     if (errorMessage != null) {
       return Scaffold(
-        appBar: AppBar(title: Text("Kamera Error")),
+        appBar: AppBar(title: const Text("Kamera Error")),
         body: Center(
-            child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Text(errorMessage!, textAlign: TextAlign.center),
-        )),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Text(errorMessage!, textAlign: TextAlign.center),
+          ),
+        ),
       );
     }
 
-    if (!ready) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+    if (!ready || _cameraService.controller == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-
-    final isFront =
-        _cameraService.currentDirection == CameraLensDirection.front;
 
     return Scaffold(
       body: Stack(
         children: [
-          Transform(
-            alignment: Alignment.center,
-            transform:
-                isFront ? Matrix4.rotationY(3.14159) : Matrix4.identity(),
-            child: CameraPreview(_cameraService.controller!),
-          ),
+          // ========================================================
+          // KAMERA PREVIEW - NON-MIRROR
+          // ========================================================
+          CameraPreview(_cameraService.controller!),
+          // ========================================================
 
+          // EYE OVERLAY - NON-MIRROR
           const EyeGuideOverlay(),
 
+          // Tombol switch camera
           Positioned(
             top: 40,
             right: 20,
             child: IconButton(
-              icon: const Icon(Icons.cameraswitch,
-                  color: Colors.white, size: 32),
+              icon: const Icon(
+                Icons.cameraswitch,
+                color: Colors.white,
+                size: 32,
+              ),
               onPressed: () async {
                 await _cameraService.switchCamera();
                 setState(() {});
@@ -89,6 +88,7 @@ class _CameraPageState extends State<CameraPage> {
             ),
           ),
 
+          // Tombol capture
           Positioned(
             bottom: 40,
             left: 0,
