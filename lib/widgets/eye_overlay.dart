@@ -18,20 +18,43 @@ class _EyeGuidePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.8)
+      ..color = Colors.white.withOpacity(0.9)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
 
-    final y = size.height * 0.4;
+    // Posisi di tengah layar, sedikit ke atas
+    final centerX = size.width / 2;
+    final centerY = size.height * 0.35;
+    final eyeRadius = 40.0;
 
-    canvas.drawCircle(Offset(size.width * 0.35, y), 30, paint);
-    canvas.drawCircle(Offset(size.width * 0.65, y), 30, paint);
+    // ============================
+    // VARIAN 1: SIMPLE CIRCLE + PUPIL
+    // ============================
+    // Outline mata (lingkaran besar)
+    canvas.drawCircle(Offset(centerX, centerY), eyeRadius, paint);
 
-    canvas.drawLine(
-      Offset(size.width * 0.25, y),
-      Offset(size.width * 0.75, y),
-      paint,
+    // Pupil (titik kecil di tengah)
+    final pupilPaint = Paint()
+      ..color = Colors.white.withOpacity(0.7)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(centerX, centerY), 8, pupilPaint);
+
+    // ============================
+    // VARIAN 2: MATA DENGAN KELIPAK (UNGKOMEN JIKA INGIN)
+    // ============================
+    final path = Path();
+    path.moveTo(centerX - eyeRadius * 0.7, centerY - eyeRadius * 0.2);
+    path.quadraticBezierTo(
+      centerX, centerY - eyeRadius * 0.9,
+      centerX + eyeRadius * 0.7, centerY - eyeRadius * 0.2,
     );
+    canvas.drawPath(path, paint);
+
+    // ============================
+    // VARIAN 3: MATA BERKELIP (Animasi) - Bisa ditambahkan nanti
+    // ============================
+    // Tambahkan AnimatedBuilder di widget parent
   }
 
   @override

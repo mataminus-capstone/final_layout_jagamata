@@ -38,6 +38,9 @@ dependencies:
   camera: ^0.11.3
   image_picker: ^1.2.1
   google_mlkit_face_detection: ^0.11.0 
+  get: ^4.6.6 # Asumsi sudah ada
+  just_audio: ^0.9.36
+  flutter_tts: ^3.8.5
     
 
   # The following adds the Cupertino Icons font to your application.

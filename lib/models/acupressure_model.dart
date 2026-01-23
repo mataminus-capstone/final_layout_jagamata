@@ -6,14 +6,16 @@ enum EyeSide { left, right }
 class AcupressurePoint {
   final String title;
   final String instruction;
-  final FaceLandmarkType landmarkType; // Titik referensi (Mata Kiri / Kanan)
+  final String description; // Tambahan untuk info detail
+  final FaceLandmarkType landmarkType;
   final EyeSide side;
-  final double offsetX; // Geser Horizontal (Negatif = Kiri Layar, Positif = Kanan Layar)
-  final double offsetY; // Geser Vertikal (Negatif = Atas, Positif = Bawah)
+  final double offsetX; // Geser Horizontal
+  final double offsetY; // Geser Vertikal
 
   AcupressurePoint({
     required this.title,
     required this.instruction,
+    required this.description,
     required this.landmarkType,
     required this.side,
     this.offsetX = 0.0,
@@ -21,94 +23,149 @@ class AcupressurePoint {
   });
 }
 
-// Data statis: Urutan 8 Titik Pijat (4 Kiri, 4 Kanan)
-// Diasumsikan tampilan kamera adalah MIRROR (Cermin)
-// Mata Kiri User ada di sisi KIRI Layar.
-// Mata Kanan User ada di sisi KANAN Layar.
+// ==============================================================================
+// 12 TITIK AKUPRESUR MATA (6 KIRI + 6 KANAN) - TERBARU & AKURAT
+// ==============================================================================
+// Berdasarkan standar akupresur TCM dan mapping MediaPipe FaceMesh landmarks
 
 final List<AcupressurePoint> acupressureSequence = [
-  // --- MATA KIRI ---
-  
-  // 1. Dekat Hidung (Jingming) - Mata Kiri
+  // ════════════════════════════════════════════════════════════════════════════
+  // MATA KIRI (6 Titik)
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // 1. JINGMING (BL1) - Sudut mata dalam dekat hidung
   AcupressurePoint(
-    title: "Mata Kiri: Sudut Dalam",
-    instruction: "Pijat bagian sudut mata kiri dekat hidung (Titik Jingming).",
+    title: "Mata Kiri: Jingming",
+    instruction: "Pijat sudut mata kiri dekat hidung. Tahan 10 detik.",
+    description: "Titik Jingming (BL1) - Menjernihkan mata",
     landmarkType: FaceLandmarkType.leftEye,
     side: EyeSide.left,
-    offsetX: 18.0, // Geser ke Kanan Layar (ke arah hidung)
+    offsetX: 18.0, // Ke arah hidung
     offsetY: 0.0,
   ),
 
-  // 2. Atas Mata (Alis/Zan Zhu) - Mata Kiri
+  // 2. ZANZHU (BL2) - Pangkal alis dekat hidung
   AcupressurePoint(
-    title: "Mata Kiri: Alis/Atas",
-    instruction: "Pijat bagian pangkal alis atau kelopak atas mata kiri.",
+    title: "Mata Kiri: Zanzhu",
+    instruction: "Pijat pangkal alis kiri dekat hidung.",
+    description: "Titik Zanzhu (BL2) - Redakan sakit kepala",
     landmarkType: FaceLandmarkType.leftEye,
     side: EyeSide.left,
-    offsetX: 0.0,
-    offsetY: -28.0, // Geser ke Atas
+    offsetX: 8.0, // Sedikit ke kanan dari sudut mata
+    offsetY: -28.0, // Tepat di bawah alis
   ),
 
-  // 3. Pelipis (Taiyang) - Mata Kiri
+  // 3. YUYAO - Tengah alis
   AcupressurePoint(
-    title: "Mata Kiri: Pelipis",
-    instruction: "Pijat bagian ujung luar mata kiri (arah pelipis).",
+    title: "Mata Kiri: Yuyao",
+    instruction: "Pijat tengah alis kira. Tahan 10 detik.",
+    description: "Titik Yuyao - Sehatkan mata",
     landmarkType: FaceLandmarkType.leftEye,
     side: EyeSide.left,
-    offsetX: -35.0, // Geser jauh ke Kiri Layar (ke arah kuping)
-    offsetY: -5.0,
+    offsetX: -8.0, // Dari titik mata ke tengah
+    offsetY: -32.0, // Lebih tinggi dari Zanzhu
   ),
 
-  // 4. Bawah Mata (Chengqi) - Mata Kiri
+  // 4. SIZHUKONG (SJ23) - Ujung alis
   AcupressurePoint(
-    title: "Mata Kiri: Bawah Kelopak",
-    instruction: "Pijat bagian tulang bawah kelopak mata kiri.",
+    title: "Mata Kiri: Sizhukong",
+    instruction: "Pijat ujung alis kiri menuju pelipis.",
+    description: "Titik Sizhukong (SJ23) - Hilangkan kelelahan mata",
     landmarkType: FaceLandmarkType.leftEye,
     side: EyeSide.left,
-    offsetX: 0.0,
-    offsetY: 25.0, // Geser ke Bawah
+    offsetX: -35.0, // Jauh ke pelipis
+    offsetY: -18.0, // Di bawah alis
   ),
 
-
-  // --- MATA KANAN ---
-
-  // 5. Dekat Hidung (Jingming) - Mata Kanan
+  // 5. TONGZILIAO (GB1) - Sudut mata luar
   AcupressurePoint(
-    title: "Mata Kanan: Sudut Dalam",
-    instruction: "Pijat bagian sudut mata kanan dekat hidung.",
-    landmarkType: FaceLandmarkType.rightEye,
-    side: EyeSide.right,
-    offsetX: -18.0, // Geser ke Kiri Layar (ke arah hidung)
+    title: "Mata Kiri: Tongziliao",
+    instruction: "Pijat sudut mata kiri luar dekat pelipis.",
+    description: "Titik Tongziliao (GB1) - Lindungi penglihatan",
+    landmarkType: FaceLandmarkType.leftEye,
+    side: EyeSide.left,
+    offsetX: -38.0, // Ke arah pelipis
     offsetY: 0.0,
   ),
 
-  // 6. Atas Mata (Alis/Zan Zhu) - Mata Kanan
+  // 6. QIUHOU - Bawah mata tengah
   AcupressurePoint(
-    title: "Mata Kanan: Alis/Atas",
-    instruction: "Pijat bagian pangkal alis atau kelopak atas mata kanan.",
+    title: "Mata Kiri: Qiuhou",
+    instruction: "Pijat tulang bawah kelopak mata kiri tengah.",
+    description: "Titik Qiuhou - Atasi mata kering",
+    landmarkType: FaceLandmarkType.leftEye,
+    side: EyeSide.left,
+    offsetX: 0.0,
+    offsetY: 25.0, // Tepat di bawah pupil
+  ),
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // MATA KANAN (6 Titik)
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // 7. JINGMING (BL1) - Sudut mata kanan dekat hidung
+  AcupressurePoint(
+    title: "Mata Kanan: Jingming",
+    instruction: "Pijat sudut mata kanan dekat hidung. Tahan 10 detik.",
+    description: "Titik Jingming (BL1) - Menjernihkan mata",
+    landmarkType: FaceLandmarkType.rightEye,
+    side: EyeSide.right,
+    offsetX: -18.0, // Ke arah hidung
+    offsetY: 0.0,
+  ),
+
+  // 8. ZANZHU (BL2) - Pangkal alis kanan dekat hidung
+  AcupressurePoint(
+    title: "Mata Kanan: Zanzhu",
+    instruction: "Pijat pangkal alis kanan dekat hidung.",
+    description: "Titik Zanzhu (BL2) - Redakan sakit kepala",
+    landmarkType: FaceLandmarkType.rightEye,
+    side: EyeSide.right,
+    offsetX: -8.0,
+    offsetY: -28.0,
+  ),
+
+  // 9. YUYAO - Tengah alis kanan
+  AcupressurePoint(
+    title: "Mata Kanan: Yuyao",
+    instruction: "Pijat tengah alis kanan. Tahan 10 detik.",
+    description: "Titik Yuyao - Sehatkan mata",
+    landmarkType: FaceLandmarkType.rightEye,
+    side: EyeSide.right,
+    offsetX: 8.0,
+    offsetY: -32.0,
+  ),
+
+  // 10. SIZHUKONG (SJ23) - Ujung alis kanan
+  AcupressurePoint(
+    title: "Mata Kanan: Sizhukong",
+    instruction: "Pijat ujung alis kanan menuju pelipis.",
+    description: "Titik Sizhukong (SJ23) - Hilangkan kelelahan mata",
+    landmarkType: FaceLandmarkType.rightEye,
+    side: EyeSide.right,
+    offsetX: 35.0, // Ke arah pelipis
+    offsetY: -18.0,
+  ),
+
+  // 11. TONGZILIAO (GB1) - Sudut mata kanan luar
+  AcupressurePoint(
+    title: "Mata Kanan: Tongziliao",
+    instruction: "Pijat sudut mata kanan luar dekat pelipis.",
+    description: "Titik Tongziliao (GB1) - Lindungi penglihatan",
+    landmarkType: FaceLandmarkType.rightEye,
+    side: EyeSide.right,
+    offsetX: 38.0, // Ke arah pelipis
+    offsetY: 0.0,
+  ),
+
+  // 12. QIUHOU - Bawah mata kanan tengah
+  AcupressurePoint(
+    title: "Mata Kanan: Qiuhou",
+    instruction: "Pijat tulang bawah kelopak mata kanan tengah.",
+    description: "Titik Qiuhou - Atasi mata kering",
     landmarkType: FaceLandmarkType.rightEye,
     side: EyeSide.right,
     offsetX: 0.0,
-    offsetY: -28.0, // Geser ke Atas
-  ),
-
-  // 7. Pelipis (Taiyang) - Mata Kanan
-  AcupressurePoint(
-    title: "Mata Kanan: Pelipis",
-    instruction: "Pijat bagian ujung luar mata kanan (arah pelipis).",
-    landmarkType: FaceLandmarkType.rightEye,
-    side: EyeSide.right,
-    offsetX: 35.0, // Geser jauh ke Kanan Layar (ke arah kuping)
-    offsetY: -5.0,
-  ),
-
-  // 8. Bawah Mata (Chengqi) - Mata Kanan
-  AcupressurePoint(
-    title: "Mata Kanan: Bawah Kelopak",
-    instruction: "Pijat bagian tulang bawah kelopak mata kanan.",
-    landmarkType: FaceLandmarkType.rightEye,
-    side: EyeSide.right,
-    offsetX: 0.0,
-    offsetY: 25.0, // Geser ke Bawah
+    offsetY: 25.0,
   ),
 ];

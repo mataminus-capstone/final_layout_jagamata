@@ -1,18 +1,18 @@
 // Lokasi: lib/pages/acupressure_page.dart
 import 'dart:io';
-import 'dart:typed_data'; // Penting untuk Uint8List
+import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Penting untuk DeviceOrientation
+import 'package:flutter/services.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 
-// Import file controller & widget (pastikan path ini benar sesuai project Anda)
+// Import controller & widget
 import 'package:jagamata/controllers/acupressure_controller.dart';
 import 'package:jagamata/widgets/face_points_painter.dart';
 
 class AcupressurePage extends StatefulWidget {
   final List<CameraDescription> cameras;
-  
+
   const AcupressurePage({super.key, required this.cameras});
 
   @override
@@ -20,10 +20,10 @@ class AcupressurePage extends StatefulWidget {
 }
 
 class _AcupressurePageState extends State<AcupressurePage> {
-  CameraController? _cameraController; 
+  CameraController? _cameraController;
   late FaceDetector _faceDetector;
   final AcupressureController _logicController = AcupressureController();
-  
+
   bool _isDetecting = false;
   List<Face> _faces = [];
 
@@ -31,10 +31,10 @@ class _AcupressurePageState extends State<AcupressurePage> {
   void initState() {
     super.initState();
     _initializeCamera();
-    
+
     _faceDetector = FaceDetector(
       options: FaceDetectorOptions(
-        enableLandmarks: true, 
+        enableLandmarks: true,
         enableContours: true,
         performanceMode: FaceDetectorMode.fast,
       ),
@@ -51,10 +51,10 @@ class _AcupressurePageState extends State<AcupressurePage> {
 
     final controller = CameraController(
       frontCamera,
-      ResolutionPreset.high, // Ubah ke High agar gambar lebih tajam
+      ResolutionPreset.high,
       enableAudio: false,
-      imageFormatGroup: Platform.isAndroid 
-          ? ImageFormatGroup.nv21 
+      imageFormatGroup: Platform.isAndroid
+          ? ImageFormatGroup.nv21
           : ImageFormatGroup.bgra8888,
     );
 
@@ -105,35 +105,27 @@ class _AcupressurePageState extends State<AcupressurePage> {
     }
 
     final size = MediaQuery.of(context).size;
-    
-    // --- RUMUS AGAR TIDAK LONJONG ---
-    // Kita hitung scale factor untuk melakukan "Cover" pada layar
-    // Tanpa merusak aspect ratio asli kamera
     var scale = size.aspectRatio * _cameraController!.value.aspectRatio;
     if (scale < 1) scale = 1 / scale;
 
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
-        fit: StackFit.expand, // Stack utama memenuhi layar
+        fit: StackFit.expand,
         children: [
-          // 1. LAYER VISUAL (Kamera + Titik)
-          // Kita membungkus Kamera DAN Painter dalam Transform yang sama
-          // Agar posisi titik tetap akurat menempel di wajah saat di-zoom
+          // LAYER VISUAL (Kamera + Titik)
           Transform.scale(
             scale: scale,
             alignment: Alignment.center,
             child: Stack(
               children: [
-                Center(
-                  child: CameraPreview(_cameraController!),
-                ),
+                Center(child: CameraPreview(_cameraController!)),
                 Center(
                   child: AnimatedBuilder(
                     animation: _logicController,
                     builder: (context, _) {
                       return CustomPaint(
-                        size: Size.infinite, // Painter mengikuti ukuran parent
+                        size: Size.infinite,
                         painter: FacePointsPainter(
                           faces: _faces,
                           imageSize: _cameraController!.value.previewSize!,
@@ -147,12 +139,10 @@ class _AcupressurePageState extends State<AcupressurePage> {
             ),
           ),
 
-          // 2. LAYER UI (Tombol & Teks)
-          // Layer ini TIDAK di-scale, agar tombol tetap di posisi wajar
-          // Tombol Kembali
+          // LAYER UI (Tombol & Teks)
           Positioned(
-            top: 50, 
-            left: 20, 
+            top: 50,
+            left: 20,
             child: CircleAvatar(
               backgroundColor: Colors.black45,
               child: IconButton(
@@ -162,13 +152,7 @@ class _AcupressurePageState extends State<AcupressurePage> {
             ),
           ),
 
-          // Panel Bawah
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: _buildControlPanel(),
-          ),
+          Positioned(bottom: 0, left: 0, right: 0, child: _buildControlPanel()),
         ],
       ),
     );
@@ -181,6 +165,22 @@ class _AcupressurePageState extends State<AcupressurePage> {
       child: AnimatedBuilder(
         animation: _logicController,
         builder: (context, _) {
+          // TOMBOL MULAI
+          if (!_logicController.isActive && !_logicController.isFinished) {
+            return ElevatedButton(
+              onPressed: _logicController.startSession,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                backgroundColor: Colors.blueAccent,
+              ),
+              child: const Text(
+                "Mulai Terapi Mata",
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          }
+
+          // LAYAR SELESAI
           if (_logicController.isFinished) {
             return Column(
               mainAxisSize: MainAxisSize.min,
@@ -190,31 +190,42 @@ class _AcupressurePageState extends State<AcupressurePage> {
                 const Text("Terapi Selesai!", style: TextStyle(color: Colors.white, fontSize: 20)),
                 const SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: _logicController.startSession,
+                  onPressed: _logicController.resetSession,
                   child: const Text("Ulangi"),
                 )
               ],
             );
           }
 
-          if (!_logicController.isActive) {
-            return ElevatedButton(
-              onPressed: _logicController.startSession,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                backgroundColor: Colors.blueAccent
-              ),
-              child: const Text("Mulai Terapi Mata", style: TextStyle(color: Colors.white)),
-            );
-          }
-
+          // LAYAR AKTIF - DENGAN TOMBOL PAUSE
           return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // TOMBOL PAUSE
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: Icon(
+                    _logicController.isActive ? Icons.pause : Icons.play_arrow,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                  onPressed: _logicController.isActive 
+                    ? _logicController.pauseSession 
+                    : _logicController.resumeSession,
+                ),
+              ),
+              const SizedBox(height: 10),
+              
+              // INFO TITIK
               Text(
                 _logicController.currentPoint.title,
-                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 5),
               Text(
@@ -222,6 +233,8 @@ class _AcupressurePageState extends State<AcupressurePage> {
                 style: const TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 15),
+              
+              // PROGRESS BAR
               LinearProgressIndicator(
                 value: _logicController.secondsLeft / 10,
                 color: Colors.blueAccent,
@@ -229,11 +242,17 @@ class _AcupressurePageState extends State<AcupressurePage> {
                 minHeight: 6,
               ),
               const SizedBox(height: 8),
+              
+              // COUNTDOWN
               Align(
                 alignment: Alignment.centerRight,
                 child: Text(
                   "${_logicController.secondsLeft} Detik",
-                  style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -252,34 +271,36 @@ class _AcupressurePageState extends State<AcupressurePage> {
     );
 
     final sensorOrientation = camera.sensorOrientation;
-    
+
     InputImageRotation? rotation;
     if (Platform.isIOS) {
       rotation = InputImageRotationValue.fromRawValue(sensorOrientation);
     } else if (Platform.isAndroid) {
-      var rotationCompensation = _orientations[_cameraController!.value.deviceOrientation];
+      var rotationCompensation =
+          _orientations[_cameraController!.value.deviceOrientation];
       if (rotationCompensation == null) return null;
-      
+
       if (camera.lensDirection == CameraLensDirection.front) {
         rotationCompensation = (sensorOrientation + rotationCompensation) % 360;
       } else {
-        rotationCompensation = (sensorOrientation - rotationCompensation + 360) % 360;
+        rotationCompensation =
+            (sensorOrientation - rotationCompensation + 360) % 360;
       }
       rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
     }
-    
+
     rotation = rotation ?? InputImageRotation.rotation270deg;
 
     final format = InputImageFormatValue.fromRawValue(image.format.raw);
-    
-    if (format == null || 
-        (Platform.isAndroid && format != InputImageFormat.nv21) || 
+
+    if (format == null ||
+        (Platform.isAndroid && format != InputImageFormat.nv21) ||
         (Platform.isIOS && format != InputImageFormat.bgra8888)) {
-          return null;
+      return null;
     }
 
     if (image.planes.isEmpty) return null;
-    
+
     final WriteBuffer allBytes = WriteBuffer();
     for (final Plane plane in image.planes) {
       allBytes.putUint8List(plane.bytes);

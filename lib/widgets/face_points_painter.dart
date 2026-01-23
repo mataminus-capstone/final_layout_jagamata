@@ -1,6 +1,7 @@
 // Lokasi: lib/widgets/face_points_painter.dart
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:jagamata/models/acupressure_model.dart';
 import 'package:jagamata/controllers/acupressure_controller.dart';
 
 class FacePointsPainter extends CustomPainter {
@@ -20,43 +21,58 @@ class FacePointsPainter extends CustomPainter {
 
     final Face face = faces.first;
     final currentPoint = controller.currentPoint;
-    final landmark = face.landmarks[currentPoint.landmarkType];
 
-    if (landmark != null) {
-      // Logic scaling untuk menyesuaikan koordinat gambar ke layar
-      final double scaleX = size.width / imageSize.height;
-      final double scaleY = size.height / imageSize.width;
+    void drawPoint(
+      FaceLandmarkType landmarkType,
+      double offsetX,
+      double offsetY, {
+      required bool isLeftEye,
+    }) {
+      final landmark = face.landmarks[landmarkType];
+      if (landmark != null) {
+        final double scaleX = size.width / imageSize.height;
+        final double scaleY = size.height / imageSize.width;
 
-      // Transformasi Koordinat (Mirroring & Scaling)
-      // Kamera depan di Android biasanya perlu dibalik (width - x)
-      double x = size.width - (landmark.position.x * scaleX);
-      double y = landmark.position.y * scaleY;
+        // ========================================================
+        // NON-MIRROR UNTUK TITIK (biar sesuai instruksi)
+        // ========================================================
+        double x = landmark.position.x * scaleX;
+        // ========================================================
 
-      // Terapkan Offset manual
-      x += (currentPoint.offsetX * scaleX);
-      y += (currentPoint.offsetY * scaleY);
+        double y = landmark.position.y * scaleY;
 
-      // --- PERBAIKAN UKURAN DI SINI ---
-      final Paint paint = Paint()
-        ..color = Colors.greenAccent.withOpacity(0.8)
-        ..style = PaintingStyle.fill;
+        x += (offsetX * scaleX);
+        y += (offsetY * scaleY);
 
-      final Paint borderPaint = Paint()
-        ..color = Colors.white
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2; // Penipisan garis batas
+        final Paint paint = Paint()
+          ..color = Colors.greenAccent.withOpacity(0.8)
+          ..style = PaintingStyle.fill;
 
-      // Radius dikecilkan agar proporsional
-      canvas.drawCircle(
-        Offset(x, y),
-        6,
-        paint,
-      ); // Ukuran titik dalam (sebelumnya 15)
-      canvas.drawCircle(
-        Offset(x, y),
-        10,
-        borderPaint,
-      ); // Ukuran ring luar (sebelumnya 18)
+        final Paint borderPaint = Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2;
+
+        canvas.drawCircle(Offset(x, y), 6, paint);
+        canvas.drawCircle(Offset(x, y), 10, borderPaint);
+      }
+    }
+
+    // LOGIC UNTUK KEDUA MATA
+    if (currentPoint.side == EyeSide.left) {
+      drawPoint(
+        currentPoint.landmarkType,
+        currentPoint.offsetX,
+        currentPoint.offsetY,
+        isLeftEye: true,
+      );
+    } else if (currentPoint.side == EyeSide.right) {
+      drawPoint(
+        currentPoint.landmarkType,
+        currentPoint.offsetX,
+        currentPoint.offsetY,
+        isLeftEye: false,
+      );
     }
   }
 
