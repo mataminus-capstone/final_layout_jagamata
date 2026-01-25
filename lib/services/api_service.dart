@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
@@ -6,12 +7,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiService {
   static const String prodBaseUrl = 'https://jagamata.web.id';
-  static const String devBaseUrl = 'http://localhost:5000';
+  static const String devBaseUrl = 'http://127.0.0.1:5000';
 
-  // development / production
+  // SET ACTIVE URL TO PROD (HOSTING)
   static const String baseUrl = prodBaseUrl;
 
-  static const Duration timeout = Duration(seconds: 30);
+  static const Duration timeout = Duration(seconds: 60);
 
   static String? token;
   static Map<String, dynamic>? userData;
@@ -54,6 +55,26 @@ class ApiService {
       headers['Authorization'] = 'Bearer $token';
     }
     return headers;
+  }
+
+  /// Helper to determine MIME type from filename extension
+  static MediaType _getMimeType(String filename) {
+    final extension = filename.toLowerCase().split('.').last;
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return MediaType('image', 'jpeg');
+      case 'png':
+        return MediaType('image', 'png');
+      case 'gif':
+        return MediaType('image', 'gif');
+      case 'webp':
+        return MediaType('image', 'webp');
+      case 'bmp':
+        return MediaType('image', 'bmp');
+      default:
+        return MediaType('image', 'jpeg'); // Default to jpeg
+    }
   }
 
   static Future<Map<String, dynamic>> register({
@@ -294,7 +315,7 @@ class ApiService {
 
       final response = await http
           .post(
-            Uri.parse('$baseUrl/api/chatbot'),
+            Uri.parse('$baseUrl/api/chatbot/'),
             headers: _getHeaders(),
             body: jsonEncode({'message': message}),
           )
@@ -485,7 +506,8 @@ class ApiService {
     try {
       final httpClient = client ?? http.Client();
 
-      final response = await httpClient.get(
+      final response = await httpClient
+          .get(
             Uri.parse('$baseUrl/api/clinics'),
             headers: _getHeaders(authenticated: true),
           )
@@ -518,26 +540,29 @@ class ApiService {
       // Remove Content-Type from headers as MultipartRequest sets it automatically
       request.headers.remove('Content-Type');
 
+      // Determine MIME type from filename
+      final filename = imageFile.name;
+      final mimeType = _getMimeType(filename);
+
       if (kIsWeb) {
-        // On web, read bytes
+        // On web, read bytes and include contentType
         final bytes = await imageFile.readAsBytes();
         request.files.add(
           http.MultipartFile.fromBytes(
             'image',
             bytes,
-            filename: imageFile.name,
+            filename: filename,
+            contentType: mimeType,
           ),
         );
       } else {
-        // On mobile, we can also use bytes to be safe, or fromPath
-        // Using fromPath is better for large files on mobile to avoid loading all into memory,
-        // but fromBytes is safer for cross-platform.
-        // Let's use fromBytes for consistency if file is not huge,
-        // OR check kIsWeb.
-
-        // safely use fromFilePath on mobile
+        // On mobile, use fromPath with contentType
         request.files.add(
-          await http.MultipartFile.fromPath('image', imageFile.path),
+          await http.MultipartFile.fromPath(
+            'image',
+            imageFile.path,
+            contentType: mimeType,
+          ),
         );
       }
 
@@ -635,6 +660,84 @@ class ApiService {
         return {'success': true, 'data': data['data']};
       } else {
         return {'success': false, 'message': 'Gagal memuat kategori'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error: ${e.toString()}'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> detectDrowsiness(XFile imageFile) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/api/predict-drowsiness'),
+      );
+
+      request.headers.addAll(_getHeaders(authenticated: true));
+      request.headers.remove('Content-Type');
+
+      // Determine MIME type from filename
+      final filename = imageFile.name;
+      final mimeType = _getMimeType(filename);
+
+      if (kIsWeb) {
+        // On web, read bytes and include contentType
+        final bytes = await imageFile.readAsBytes();
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            bytes,
+            filename: filename,
+            contentType: mimeType,
+          ),
+        );
+      } else {
+        // On mobile, use fromPath with contentType
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'image',
+            imageFile.path,
+            contentType: mimeType,
+          ),
+        );
+      }
+
+      final streamedResponse = await request.send().timeout(timeout);
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data['data']};
+      } else {
+        final data = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Deteksi kelelahan gagal',
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error: ${e.toString()}'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> getDrowsinessHistory() async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/api/drowsiness-history'),
+            headers: _getHeaders(authenticated: true),
+          )
+          .timeout(timeout);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data['data']};
+      } else {
+        final data = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Gagal memuat riwayat kelelahan',
+        };
       }
     } catch (e) {
       return {'success': false, 'message': 'Error: ${e.toString()}'};

@@ -4,6 +4,7 @@ import 'package:jagamata/services/image_picker.dart';
 import 'package:jagamata/services/api_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'riwayat_deteksi.dart';
+import 'riwayat_kelelahan.dart';
 
 class Deteksi extends StatefulWidget {
   const Deteksi({super.key});
@@ -30,168 +31,223 @@ class _DeteksiState extends State<Deteksi> {
           IconButton(
             icon: Icon(Icons.history, color: Color(0xFF4A77A1)),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => RiwayatDeteksi()),
-              );
+              _showHistoryChoice(context);
             },
           ),
         ],
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Pilih Layanan Deteksi",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue[900],
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                "Silakan pilih jenis deteksi yang Anda butuhkan",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+              ),
+              SizedBox(height: 40),
+
+              // Button 1: Deteksi Penyakit Mata
+              _buildDetectionOption(
+                context,
+                title: "Deteksi Penyakit Mata",
+                subtitle: "Katarak, Glaukoma, dll",
+                icon: Icons.health_and_safety_outlined,
+                color: Color(0xFF80AFCC),
+                onTap: () => _showImageSourceDialog(context, isDisease: true),
+              ),
+
+              SizedBox(height: 20),
+
+              // Button 2: Deteksi Kelelahan Mata
+              _buildDetectionOption(
+                context,
+                title: "Deteksi Kelelahan Mata",
+                subtitle: "Analisis Kantuk & Kelelahan",
+                icon: Icons.remove_red_eye_outlined,
+                color: Color(
+                  0xFFA2C38E,
+                ), // Greenish for variety or keep consistent
+                onTap: () => _showImageSourceDialog(context, isDisease: false),
+              ),
+
+              SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetectionOption(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.5), width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 10,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
           children: [
-            Icon(Icons.qr_code_scanner, size: 100, color: Colors.blue[600]),
-            SizedBox(height: 20),
-            Text(
-              "Pindai Kondisi Mata Anda",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.blue[900],
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              "Gunakan kamera atau unggah foto untuk memulai analisis mata.",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-            ),
-            SizedBox(height: 40),
-
-            // Tombol Camera
-            InkWell(
-              onTap: () async {
-                final imagePath = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CameraPage()),
-                );
-
-                if (imagePath != null) {
-                   // camera page returns string path. Convert to XFile for consistent API
-                   final file = XFile(imagePath);
-                  _processImage(context, file);
-                }
-              },
-              child: Container(
-                width: 300,
-                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Color(0xFF80AFCC),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 5,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.camera_alt_outlined,
-                      size: 35,
-                      color: Colors.black,
-                    ),
-                    SizedBox(width: 15),
-                    Text(
-                      "Scan dengan Kamera",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            SizedBox(height: 25),
-
-            // space
             Container(
-              width: 250,
-              child: Row(
+              padding: EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 40, color: Colors.blue[900]),
+            ),
+            SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Divider(thickness: 1, color: Colors.grey[400]),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      "atau",
-                      style: TextStyle(color: Colors.grey[600]),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
                   ),
-                  Expanded(
-                    child: Divider(thickness: 1, color: Colors.grey[400]),
+                  SizedBox(height: 5),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 25),
+            Icon(Icons.arrow_forward_ios, size: 20, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
 
-            // Tombol Unggah Foto
-            InkWell(
-              onTap: () async {
-                final pickerService = ImagePickerService();
-                final image = await pickerService.pickFromGallery();
-
-                if (image != null) {
-                  _processImage(context, image);
-                }
-              },
-              child: Container(
-                width: 300,
-                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Color(0xFF80AFCC),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 5,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.image_search_outlined,
-                      size: 35,
-                      color: Colors.black,
-                    ),
-                    SizedBox(width: 15),
-                    Text(
-                      "Unggah Gambar",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+  void _showHistoryChoice(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Lihat Riwayat",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 30),
-            // space
+            SizedBox(height: 20),
+            ListTile(
+              leading: Icon(Icons.history, color: Colors.blue),
+              title: Text("Riwayat Deteksi Penyakit"),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RiwayatDeteksi()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.timelapse, color: Colors.green),
+              title: Text("Riwayat Kelelahan"),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RiwayatKelelahan()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showImageSourceDialog(BuildContext context, {required bool isDisease}) {
+    // Capture the parent context BEFORE showing the bottom sheet
+    // This context will remain valid after the bottom sheet is closed
+    final rootContext = context;
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (bottomSheetContext) => Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              isDisease ? "Scan Penyakit Mata" : "Scan Kelelahan Mata",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Icon(Icons.lock_outline, size: 20, color: Colors.green[400]),
-                SizedBox(width: 8),
-                Text(
-                  "Data Anda aman & Riwayat tersimpan",
-                  style: TextStyle(color: Colors.grey[600]),
+                _buildSourceButton(
+                  bottomSheetContext,
+                  icon: Icons.camera_alt,
+                  label: "Kamera",
+                  onTap: () async {
+                    Navigator.pop(bottomSheetContext);
+                    final imagePath = await Navigator.push(
+                      rootContext, // Use root context for navigation
+                      MaterialPageRoute(builder: (_) => const CameraPage()),
+                    );
+                    if (imagePath != null && mounted) {
+                      _processImage(rootContext, XFile(imagePath), isDisease);
+                    }
+                  },
+                ),
+                _buildSourceButton(
+                  bottomSheetContext,
+                  icon: Icons.photo_library,
+                  label: "Galeri",
+                  onTap: () async {
+                    Navigator.pop(bottomSheetContext);
+                    final pickerService = ImagePickerService();
+                    final image = await pickerService.pickFromGallery();
+                    if (image != null && mounted) {
+                      _processImage(rootContext, image, isDisease);
+                    }
+                  },
                 ),
               ],
             ),
@@ -201,20 +257,70 @@ class _DeteksiState extends State<Deteksi> {
     );
   }
 
-  void _processImage(BuildContext context, XFile imageFile) async {
+  Widget _buildSourceButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 30, color: Colors.blue),
+          ),
+          SizedBox(height: 8),
+          Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  void _processImage(
+    BuildContext context,
+    XFile imageFile,
+    bool isDisease,
+  ) async {
+    // Check if widget is still mounted before showing dialog
+    if (!mounted) return;
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Center(child: CircularProgressIndicator()),
+      builder: (dialogContext) => Center(child: CircularProgressIndicator()),
     );
 
-    final result = await ApiService.detectDisease(imageFile);
+    Map<String, dynamic> result;
+    try {
+      if (isDisease) {
+        result = await ApiService.detectDisease(imageFile);
+      } else {
+        result = await ApiService.detectDrowsiness(imageFile);
+      }
+    } catch (e) {
+      result = {'success': false, 'message': 'Error: ${e.toString()}'};
+    }
+
+    // Check if widget is still mounted before closing dialog
+    if (!mounted) return;
     Navigator.pop(context); // Close loading
 
     if (result['success']) {
       final data = result['data'];
-      _showResultDialog(context, data);
+      if (!mounted) return;
+      if (isDisease) {
+        _showResultDialog(context, data);
+      } else {
+        _showDrowsinessResultDialog(context, data);
+      }
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result['message'] ?? 'Gagal memproses gambar')),
       );
@@ -236,16 +342,23 @@ class _DeteksiState extends State<Deteksi> {
           children: [
             Center(
               child: Container(
-                width: 60, 
-                height: 5, 
-                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10)),
+                width: 60,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
             SizedBox(height: 20),
             Center(
               child: Text(
-                "Hasil Analisis",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blue[800]),
+                "Hasil Analisis Penyakit",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue[800],
+                ),
               ),
             ),
             SizedBox(height: 20),
@@ -257,20 +370,34 @@ class _DeteksiState extends State<Deteksi> {
                   height: 150,
                   width: 150,
                   fit: BoxFit.cover,
-                  errorBuilder: (ctx, err, stack) => Icon(Icons.broken_image, size: 100, color: Colors.grey),
+                  errorBuilder: (ctx, err, stack) =>
+                      Icon(Icons.broken_image, size: 100, color: Colors.grey),
                 ),
               ),
             ),
             SizedBox(height: 20),
-            _buildResultItem("Diagnosa", data['diagnosis'], Icons.health_and_safety, isTitle: true),
+            _buildResultItem(
+              "Diagnosa",
+              data['diagnosis'],
+              Icons.health_and_safety,
+              isTitle: true,
+            ),
             Divider(),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    _buildResultItem("Penanganan & Obat", data['handling'], Icons.medication),
+                    _buildResultItem(
+                      "Penanganan & Obat",
+                      data['handling'],
+                      Icons.medication,
+                    ),
                     SizedBox(height: 15),
-                    _buildResultItem("Solusi & Edukasi", data['solution'], Icons.healing),
+                    _buildResultItem(
+                      "Solusi & Edukasi",
+                      data['solution'],
+                      Icons.healing,
+                    ),
                     SizedBox(height: 15),
                     Divider(),
                     SizedBox(height: 10),
@@ -278,24 +405,40 @@ class _DeteksiState extends State<Deteksi> {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         "Rekomendasi Obat",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.black87,
+                        ),
                       ),
                     ),
                     SizedBox(height: 10),
                     // Fetch medicines based on diagnosis category
                     FutureBuilder<Map<String, dynamic>>(
-                      future: ApiService.getMedicines(category: data['diagnosis']),
+                      future: ApiService.getMedicines(
+                        category: data['diagnosis'],
+                      ),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Center(child: Padding(padding: EdgeInsets.all(10), child: CircularProgressIndicator()));
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
                         }
-                        if (snapshot.hasError || !snapshot.hasData || !(snapshot.data!['success'] ?? false)) {
+                        if (snapshot.hasError ||
+                            !snapshot.hasData ||
+                            !(snapshot.data!['success'] ?? false)) {
                           return Text("Tidak ada rekomendasi obat khusus.");
                         }
 
                         final medicines = snapshot.data!['data'] as List;
                         if (medicines.isEmpty) {
-                          return Text("Tidak ada rekomendasi obat ditemukan untuk kondisi ini.");
+                          return Text(
+                            "Tidak ada rekomendasi obat ditemukan untuk kondisi ini.",
+                          );
                         }
 
                         return SizedBox(
@@ -311,37 +454,63 @@ class _DeteksiState extends State<Deteksi> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.grey.shade200),
-                                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     ClipRRect(
-                                      borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(10),
+                                      ),
                                       child: Image.network(
                                         med['image_url'] ?? '',
                                         height: 80,
                                         width: double.infinity,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                            Container(height: 80, color: Colors.grey[200], child: Icon(Icons.image_not_supported)),
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Container(
+                                                  height: 80,
+                                                  color: Colors.grey[200],
+                                                  child: Icon(
+                                                    Icons.image_not_supported,
+                                                  ),
+                                                ),
                                       ),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             med['name'] ?? 'Obat',
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
                                           ),
                                           Text(
-                                            med['price'] != null ? 'Rp ${med['price']}' : '',
-                                            style: TextStyle(fontSize: 10, color: Colors.orange[800]),
+                                            med['price'] != null
+                                                ? 'Rp ${med['price']}'
+                                                : '',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: Colors.orange[800],
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -365,10 +534,18 @@ class _DeteksiState extends State<Deteksi> {
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF80AFCC),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                   padding: EdgeInsets.symmetric(vertical: 15),
                 ),
-                child: Text("Tutup", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                child: Text(
+                  "Tutup",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
@@ -377,7 +554,143 @@ class _DeteksiState extends State<Deteksi> {
     );
   }
 
-  Widget _buildResultItem(String title, String content, IconData icon, {bool isTitle = false}) {
+  void _showDrowsinessResultDialog(
+    BuildContext context,
+    Map<String, dynamic> data,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 60,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Center(
+              child: Text(
+                "Hasil Analisis Kelelahan",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue[800],
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Image.network(
+                  data['image_url'],
+                  height: 150,
+                  width: 150,
+                  fit: BoxFit.cover,
+                  errorBuilder: (ctx, err, stack) =>
+                      Icon(Icons.broken_image, size: 100, color: Colors.grey),
+                ),
+              ),
+            ),
+            SizedBox(height: 30),
+
+            // Result Display
+            Container(
+              padding: EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.face, size: 40, color: Colors.blue[900]),
+                  SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Status Detected",
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          data['label'] ?? 'Unknown',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue[900],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      "${((data['confidence'] ?? 0) * 100).toStringAsFixed(1)}%",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[800],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF80AFCC),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                ),
+                child: Text(
+                  "Tutup",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultItem(
+    String title,
+    String content,
+    IconData icon, {
+    bool isTitle = false,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -389,16 +702,20 @@ class _DeteksiState extends State<Deteksi> {
             children: [
               Text(
                 title,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
               ),
               SizedBox(height: 5),
               Text(
                 content,
                 style: TextStyle(
-                  fontSize: 14, 
-                  color: Colors.black87, 
+                  fontSize: 14,
+                  color: Colors.black87,
                   fontWeight: isTitle ? FontWeight.bold : FontWeight.normal,
-                  height: 1.5
+                  height: 1.5,
                 ),
               ),
             ],
