@@ -57,7 +57,7 @@ const fatigueTherapyConfig = TherapyConfig(
   repetitions: 2,
   pressureLevel: "Sedang - Kuat",
   description:
-      "Terapi untuk mata yang terdeteksi kelelahan. Pijat dengan tekanan sedang hingga kuat.",
+      "Terapi untuk mata yang menunjukkan indikasi kelelahan. Pijat dengan tekanan sedang hingga kuat.",
 );
 
 /// Konfigurasi untuk mata normal
@@ -75,7 +75,7 @@ const normalTherapyConfig = TherapyConfig(
 // ==============================================================================
 // TITIK AKUPRESUR UNTUK MATA KELELAHAN (6 Titik per sisi)
 // ==============================================================================
-// Berdasarkan riset: Dipakai hanya saat terdeteksi kelelahan
+// Berdasarkan riset: Dipakai saat menunjukkan indikasi kelelahan
 
 final List<AcupressurePoint> fatigueAcupressurePoints = [
   // ════════════════════════════════════════════════════════════════════════════

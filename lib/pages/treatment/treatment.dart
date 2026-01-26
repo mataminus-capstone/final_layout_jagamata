@@ -3,6 +3,7 @@ import 'package:jagamata/main.dart' show cameras;
 import 'package:jagamata/models/acupressure_model.dart';
 import 'package:jagamata/pages/treatment/acupressure_page.dart';
 import 'package:jagamata/services/api_service.dart';
+import 'package:jagamata/utils/label_utils.dart';
 
 class TreatmentPage extends StatefulWidget {
   const TreatmentPage({super.key});
@@ -130,7 +131,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
               context,
               title: "Teknik Akupresur",
               description:
-                  "Pijatan lembut pada titik-titik di area sekitar mata berdasarkan hasil deteksi kelelahan terakhir.",
+                  "Pijatan lembut pada titik-titik di area sekitar mata berdasarkan hasil analisis potensi kelelahan terakhir.",
               icon: Icons.touch_app_rounded,
               color: kTosca,
               onTap: () => _navigateToAcupressure(context),
@@ -239,6 +240,9 @@ class _TreatmentPageState extends State<TreatmentPage> {
   }
 
   String _formatLastDetection(String label, String createdAt) {
+    // Translate label to Indonesian
+    final translatedLabel = translateDrowsinessLabel(label);
+
     try {
       final date = DateTime.parse(createdAt);
       final now = DateTime.now();
@@ -255,9 +259,9 @@ class _TreatmentPageState extends State<TreatmentPage> {
         timeAgo = "${date.day}/${date.month}/${date.year}";
       }
 
-      return "$label ($timeAgo)";
+      return "$translatedLabel ($timeAgo)";
     } catch (e) {
-      return label;
+      return translatedLabel;
     }
   }
 
@@ -308,7 +312,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
 
             // Title
             Text(
-              isFatigued ? "Mode Terapi Kelelahan" : "Mode Terapi Maintenance",
+              isFatigued ? "Mode Indikasi Lelah" : "Mode Terapi Maintenance",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -345,8 +349,8 @@ class _TreatmentPageState extends State<TreatmentPage> {
             // Description
             Text(
               isFatigued
-                  ? "Berdasarkan hasil deteksi terakhir, mata Anda terdeteksi kelelahan. Terapi akan menggunakan 6 titik akupresur dengan tekanan sedang-kuat."
-                  : "Berdasarkan hasil deteksi terakhir, mata Anda dalam kondisi baik. Terapi akan menggunakan 4 titik akupresur dengan tekanan ringan untuk maintenance.",
+                  ? "Berdasarkan analisis terakhir, mata Anda menunjukkan indikasi kelelahan. Terapi akan menggunakan 6 titik akupresur dengan tekanan sedang-kuat."
+                  : "Berdasarkan analisis terakhir, mata Anda menunjukkan kondisi baik. Terapi akan menggunakan 4 titik akupresur dengan tekanan ringan untuk maintenance.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
@@ -479,7 +483,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
             const SizedBox(height: 8),
 
             Text(
-              "Anda belum pernah melakukan deteksi kelelahan mata. Silakan pilih mode terapi secara manual atau lakukan deteksi terlebih dahulu.",
+              "Anda belum pernah melakukan analisis potensi kelelahan mata. Silakan pilih mode terapi secara manual atau lakukan deteksi terlebih dahulu.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
@@ -582,7 +586,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
             // Fatigued option
             _buildModeOption(
               ctx,
-              title: "Mata Kelelahan",
+              title: "Indikasi Kelelahan",
               description:
                   "6 titik akupresur, 12 detik/titik, tekanan sedang-kuat",
               icon: Icons.warning_amber_rounded,
@@ -697,7 +701,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
           ],
         ),
         content: Text(
-          "Gagal mengambil data riwayat kelelahan. Anda masih dapat memilih mode terapi secara manual.",
+          "Gagal mengambil data riwayat analisis. Anda masih dapat memilih mode terapi secara manual.",
           style: TextStyle(color: Colors.grey[700]),
         ),
         actions: [

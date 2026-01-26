@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jagamata/services/api_service.dart';
+import 'package:jagamata/utils/label_utils.dart';
 import 'package:intl/intl.dart';
 
 class HistoryDetectionPage extends StatefulWidget {
@@ -277,7 +278,7 @@ class _HistoryDetectionPageState extends State<HistoryDetectionPage>
                     ),
                     SizedBox(height: 4),
                     Text(
-                      "Analisis kantuk dan kelelahan mata",
+                      "Analisis potensi kantuk dan kelelahan mata",
                       style: TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                   ],
@@ -310,7 +311,7 @@ class _HistoryDetectionPageState extends State<HistoryDetectionPage>
                   icon: Icons.remove_red_eye_outlined,
                   title: "Belum Ada Riwayat",
                   subtitle:
-                      "Anda belum pernah melakukan deteksi kelelahan mata",
+                      "Anda belum pernah melakukan analisis potensi kelelahan mata",
                   color: kTosca,
                 )
               : RefreshIndicator(
@@ -480,7 +481,7 @@ class _HistoryDetectionPageState extends State<HistoryDetectionPage>
                     children: [
                       _buildInfoRow(
                         icon: Icons.medical_services_outlined,
-                        title: "Hasil Deteksi",
+                        title: "Hasil Analisis Potensi",
                         content: item['diagnosis'] ?? 'Tidak diketahui',
                         isBold: true,
                         color: kDarkBlue,
@@ -635,7 +636,7 @@ class _HistoryDetectionPageState extends State<HistoryDetectionPage>
                           Icon(Icons.face, size: 16, color: statusColor),
                           SizedBox(width: 6),
                           Text(
-                            "Status:",
+                            "Indikasi:",
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -657,7 +658,7 @@ class _HistoryDetectionPageState extends State<HistoryDetectionPage>
                           ),
                         ),
                         child: Text(
-                          item['label'] ?? 'Tidak diketahui',
+                          translateDrowsinessLabel(item['label']),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,

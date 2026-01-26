@@ -213,7 +213,7 @@ class _AcupressurePageState extends State<AcupressurePage> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            isFatigued ? "Mata Lelah" : "Mata Normal",
+                            isFatigued ? "Indikasi Lelah" : "Kondisi Baik",
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -294,7 +294,7 @@ class _AcupressurePageState extends State<AcupressurePage> {
                       children: [
                         Text(
                           isFatigued
-                              ? "Terapi Mata Lelah"
+                              ? "Terapi Indikasi Lelah"
                               : "Terapi Maintenance",
                           style: const TextStyle(
                             color: Colors.white,

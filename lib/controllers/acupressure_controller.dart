@@ -148,7 +148,7 @@ class AcupressureController extends ChangeNotifier {
   Map<String, dynamic> getSessionInfo() {
     return {
       'condition': _condition == EyeCondition.fatigued
-          ? 'Mata Kelelahan'
+          ? 'Indikasi Kelelahan'
           : 'Mata Normal',
       'totalPoints': _points.length,
       'durationPerPoint': _config.durationPerPoint,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jagamata/services/api_service.dart';
+import 'package:jagamata/utils/label_utils.dart';
 
 class RiwayatKelelahan extends StatefulWidget {
   const RiwayatKelelahan({super.key});
@@ -141,14 +142,14 @@ class _RiwayatKelelahanState extends State<RiwayatKelelahan> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Status Kelelahan:",
+                                    "Indikasi Kelelahan:",
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey[600],
                                     ),
                                   ),
                                   Text(
-                                    item['label'] ?? 'Tidak diketahui',
+                                    translateDrowsinessLabel(item['label']),
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18,

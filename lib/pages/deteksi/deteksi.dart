@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:jagamata/models/acupressure_model.dart';
 import 'package:jagamata/pages/treatment/acupressure_page.dart';
 import 'package:jagamata/main.dart' show cameras;
+import 'package:jagamata/utils/label_utils.dart';
 import 'riwayat_deteksi.dart';
 import 'riwayat_kelelahan.dart';
 
@@ -357,7 +358,7 @@ class _DeteksiState extends State<Deteksi> {
             SizedBox(height: 20),
             Center(
               child: Text(
-                "Hasil Analisis Penyakit",
+                "Hasil Analisis Potensi Penyakit",
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -616,7 +617,7 @@ class _DeteksiState extends State<Deteksi> {
             SizedBox(height: 20),
             Center(
               child: Text(
-                "Hasil Analisis Kelelahan",
+                "Hasil Analisis Potensi Kelelahan",
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -678,7 +679,7 @@ class _DeteksiState extends State<Deteksi> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Status Terdeteksi",
+                          "Indikasi Terdeteksi",
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 12,
@@ -686,7 +687,7 @@ class _DeteksiState extends State<Deteksi> {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          data['label'] ?? 'Unknown',
+                          translateDrowsinessLabel(data['label']),
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -765,8 +766,8 @@ class _DeteksiState extends State<Deteksi> {
                   SizedBox(height: 12),
                   Text(
                     isFatigued
-                        ? "Mata Anda terdeteksi kelelahan. Kami merekomendasikan terapi akupresur dengan 6 titik khusus untuk mengatasi kelelahan mata."
-                        : "Mata Anda dalam kondisi baik! Anda dapat melakukan terapi akupresur maintenance untuk menjaga kesehatan mata.",
+                        ? "Mata Anda menunjukkan indikasi kelelahan. Kami merekomendasikan terapi akupresur dengan 6 titik khusus untuk membantu merilekskan mata."
+                        : "Mata Anda menunjukkan kondisi baik! Anda dapat melakukan terapi akupresur maintenance untuk menjaga kesehatan mata.",
                     style: TextStyle(
                       color: Colors.grey[700],
                       fontSize: 13,
