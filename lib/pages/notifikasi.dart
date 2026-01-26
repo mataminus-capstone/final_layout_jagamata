@@ -75,7 +75,7 @@ class _NotifikasiState extends State<Notifikasi> {
          newNotifications.add({
            'type': 'reminder',
            'title': 'Waktunya Cek Mata!',
-           'message': 'Anda belum melakukan deteksi penyakit mata hari ini. Yuk cek sekarang!',
+           'message': 'Anda belum melakukan deteksi potensi penyakit mata hari ini. Yuk cek sekarang!',
            'time': 'Sekarang',
            'icon': Icons.alarm,
            'action_route': '/deteksi', // Or /homepage then logic? No, directly.

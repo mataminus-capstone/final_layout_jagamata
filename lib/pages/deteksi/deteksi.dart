@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
 import 'camera_page.dart';
 import 'package:jagamata/services/image_picker.dart';
 import 'package:jagamata/services/api_service.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jagamata/models/acupressure_model.dart';
+import 'package:jagamata/pages/treatment/acupressure_page.dart';
+import 'package:jagamata/main.dart' show cameras;
 import 'riwayat_deteksi.dart';
 import 'riwayat_kelelahan.dart';
 
@@ -58,10 +62,10 @@ class _DeteksiState extends State<Deteksi> {
               ),
               SizedBox(height: 40),
 
-              // Button 1: Deteksi Penyakit Mata
+              // Button 1: Deteksi Potensi Penyakit Mata
               _buildDetectionOption(
                 context,
-                title: "Deteksi Penyakit Mata",
+                title: "Deteksi Potensi Penyakit Mata",
                 subtitle: "Katarak, Glaukoma, dll",
                 icon: Icons.health_and_safety_outlined,
                 color: Color(0xFF80AFCC),
@@ -70,10 +74,10 @@ class _DeteksiState extends State<Deteksi> {
 
               SizedBox(height: 20),
 
-              // Button 2: Deteksi Kelelahan Mata
+              // Button 2: Deteksi Potensi Kelelahan Mata
               _buildDetectionOption(
                 context,
-                title: "Deteksi Kelelahan Mata",
+                title: "Deteksi Potensi Kelelahan Mata",
                 subtitle: "Analisis Kantuk & Kelelahan",
                 icon: Icons.remove_red_eye_outlined,
                 color: Color(
@@ -172,7 +176,7 @@ class _DeteksiState extends State<Deteksi> {
             SizedBox(height: 20),
             ListTile(
               leading: Icon(Icons.history, color: Colors.blue),
-              title: Text("Riwayat Deteksi Penyakit"),
+              title: Text("Riwayat Deteksi Potensi Penyakit"),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -558,14 +562,43 @@ class _DeteksiState extends State<Deteksi> {
     BuildContext context,
     Map<String, dynamic> data,
   ) {
+    // Determine if the user is fatigued based on the label
+    final String label = (data['label'] ?? 'Unknown').toString().toLowerCase();
+
+    // First check for NON-fatigued indicators (awake, non drowsy, etc.)
+    final bool isNotFatigued =
+        label.contains('non') ||
+        label.contains('not') ||
+        label.contains('tidak') ||
+        label.contains('awake') ||
+        label.contains('normal') ||
+        label.contains('segar') ||
+        label.contains('alert');
+
+    // Only consider fatigued if NOT marked as non-fatigued
+    final bool hasFatigueKeyword =
+        label.contains('drowsy') ||
+        label.contains('fatigue') ||
+        label.contains('tired') ||
+        label.contains('kantuk') ||
+        label.contains('lelah') ||
+        label.contains('ngantuk');
+
+    // Final determination: fatigued only if has fatigue keyword AND not marked as non-fatigued
+    final bool isFatigued = hasFatigueKeyword && !isNotFatigued;
+
+    final Color kDarkBlue = const Color(0xFF11417f);
+    final Color kTosca = const Color(0xFFa2c38e);
+    final Color kOrange = const Color(0xFFff7043);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
       ),
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.6,
+      builder: (bottomSheetContext) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
         padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -587,7 +620,7 @@ class _DeteksiState extends State<Deteksi> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue[800],
+                  color: kDarkBlue,
                 ),
               ),
             ),
@@ -597,60 +630,90 @@ class _DeteksiState extends State<Deteksi> {
                 borderRadius: BorderRadius.circular(15),
                 child: Image.network(
                   data['image_url'],
-                  height: 150,
-                  width: 150,
+                  height: 130,
+                  width: 130,
                   fit: BoxFit.cover,
                   errorBuilder: (ctx, err, stack) =>
-                      Icon(Icons.broken_image, size: 100, color: Colors.grey),
+                      Icon(Icons.broken_image, size: 80, color: Colors.grey),
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 20),
 
             // Result Display
             Container(
               padding: EdgeInsets.all(15),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: isFatigued
+                    ? kOrange.withOpacity(0.1)
+                    : kTosca.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: isFatigued
+                      ? kOrange.withOpacity(0.3)
+                      : kTosca.withOpacity(0.3),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.face, size: 40, color: Colors.blue[900]),
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: isFatigued
+                          ? kOrange.withOpacity(0.2)
+                          : kTosca.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isFatigued
+                          ? Icons.warning_amber_rounded
+                          : Icons.check_circle,
+                      size: 30,
+                      color: isFatigued ? kOrange : kTosca,
+                    ),
+                  ),
                   SizedBox(width: 15),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Status Detected",
+                          "Status Terdeteksi",
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 12,
                           ),
                         ),
+                        SizedBox(height: 4),
                         Text(
                           data['label'] ?? 'Unknown',
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue[900],
+                            color: isFatigued ? kOrange : kTosca,
                           ),
                         ),
                       ],
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 5,
+                        ),
+                      ],
                     ),
                     child: Text(
                       "${((data['confidence'] ?? 0) * 100).toStringAsFixed(1)}%",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue[800],
+                        color: kDarkBlue,
+                        fontSize: 14,
                       ),
                     ),
                   ),
@@ -658,29 +721,180 @@ class _DeteksiState extends State<Deteksi> {
               ),
             ),
 
-            Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF80AFCC),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 15),
+            SizedBox(height: 20),
+
+            // Acupressure Recommendation Card
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isFatigued
+                      ? [kOrange.withOpacity(0.1), kOrange.withOpacity(0.05)]
+                      : [kTosca.withOpacity(0.1), kTosca.withOpacity(0.05)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: Text(
-                  "Tutup",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: isFatigued
+                      ? kOrange.withOpacity(0.2)
+                      : kTosca.withOpacity(0.2),
                 ),
               ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.spa,
+                        color: isFatigued ? kOrange : kTosca,
+                        size: 24,
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        "Rekomendasi Akupresur",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: kDarkBlue,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    isFatigued
+                        ? "Mata Anda terdeteksi kelelahan. Kami merekomendasikan terapi akupresur dengan 6 titik khusus untuk mengatasi kelelahan mata."
+                        : "Mata Anda dalam kondisi baik! Anda dapat melakukan terapi akupresur maintenance untuk menjaga kesehatan mata.",
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  // Info badges
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildInfoBadge(
+                        icon: Icons.touch_app,
+                        label: isFatigued ? "6 Titik/Sisi" : "4 Titik/Sisi",
+                        color: isFatigued ? kOrange : kTosca,
+                      ),
+                      _buildInfoBadge(
+                        icon: Icons.timer,
+                        label: isFatigued ? "12 Detik/Titik" : "6 Detik/Titik",
+                        color: isFatigued ? kOrange : kTosca,
+                      ),
+                      _buildInfoBadge(
+                        icon: Icons.compress,
+                        label: isFatigued
+                            ? "Tekanan Sedang-Kuat"
+                            : "Tekanan Ringan",
+                        color: isFatigued ? kOrange : kTosca,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            Spacer(),
+
+            // Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(bottomSheetContext),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.grey[400]!),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                    ),
+                    child: Text(
+                      "Tutup",
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(bottomSheetContext);
+                      // Navigate to Acupressure page with the appropriate condition
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AcupressurePage(
+                            cameras: cameras,
+                            eyeCondition: isFatigued
+                                ? EyeCondition.fatigued
+                                : EyeCondition.normal,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.spa, color: Colors.white),
+                    label: Text(
+                      "Mulai Akupresur",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isFatigued ? kOrange : kTosca,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoBadge({
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
