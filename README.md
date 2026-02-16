@@ -1,4 +1,3 @@
----
 # 👁️ JagaMata - Aplikasi Deteksi Penyakit Mata & Akupresur
 
 > **Capstone Project - Final Layout**
@@ -48,5 +47,3 @@ Pastikan Anda telah menginstal Flutter SDK pada mesin Anda.
 ## 📄 Lisensi
 
 Project ini dibuat untuk memenuhi tugas Capstone Project. Hak cipta milik tim pengembang dan institusi terkait.
-
----
