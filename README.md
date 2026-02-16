@@ -1,16 +1,52 @@
-# jagamata
+---
+# 👁️ JagaMata - Aplikasi Deteksi Penyakit Mata & Akupresur
 
-A new Flutter project.
+> **Capstone Project - Final Layout**
 
-## Getting Started
+**JagaMata** adalah aplikasi mobile berbasis Flutter yang dirancang untuk membantu pengguna melakukan deteksi dini terhadap potensi penyakit mata serta memberikan panduan penanganan awal melalui terapi akupresur. Repositori ini berisi implementasi *layout* final dan fungsionalitas utama aplikasi.
 
-This project is a starting point for a Flutter application.
+## 📱 Fitur Utama
 
-A few resources to get you started if this is your first Flutter project:
+* **Deteksi Penyakit Mata**: Menggunakan teknologi *image processing* / *machine learning* untuk menganalisis kondisi mata pengguna.
+* **Panduan Akupresur**: Instruksi visual dan langkah-langkah terapi pijat titik saraf untuk meredakan kelelahan atau gangguan ringan pada mata.
+* **Antarmuka Ramah Pengguna**: Desain UI/UX yang intuitif dan mudah digunakan oleh berbagai kalangan.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🛠️ Tech Stack
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+* **Framework**: [Flutter](https://flutter.dev/)
+* **Language**: Dart
+
+## 🚀 Cara Menjalankan (Installation)
+
+Pastikan Anda telah menginstal Flutter SDK pada mesin Anda.
+
+1.  **Clone repositori ini**
+    ```bash
+    git clone [https://github.com/mataminus-capstone/final_layout_jagamata.git](https://github.com/mataminus-capstone/final_layout_jagamata.git)
+    ```
+
+2.  **Masuk ke direktori project**
+    ```bash
+    cd final_layout_jagamata
+    ```
+
+3.  **Install dependencies**
+    ```bash
+    flutter pub get
+    ```
+
+4.  **Jalankan aplikasi**
+    * Untuk mode debug:
+        ```bash
+        flutter run
+        ```
+    * Untuk build APK (Android):
+        ```bash
+        flutter build apk --release
+        ```
+
+## 📄 Lisensi
+
+Project ini dibuat untuk memenuhi tugas Capstone Project. Hak cipta milik tim pengembang dan institusi terkait.
+
+---
