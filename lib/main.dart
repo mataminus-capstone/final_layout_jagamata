@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart'; // Import Wajib untuk Kamera
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:jagamata/app/routes/app_pages.dart';
+import 'package:jagamata/pages/analisis_kelelahan/views/analisis_kelelahan_view.dart';
+import 'package:jagamata/pages/analisis_potensi/views/analisis_potensi_view.dart';
+import 'package:jagamata/pages/riwayat_deteksi_mata/views/riwayat_deteksi_mata_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Import halaman-halaman aplikasi
@@ -28,6 +35,10 @@ import 'package:jagamata/pages/complete_profile_page.dart';
 import 'package:jagamata/pages/profil/history_detection_page.dart';
 import 'package:jagamata/pages/loading_page.dart';
 
+import 'package:jagamata/pages/analisis_kelelahan/controllers/analisis_kelelahan_controller.dart';
+import 'package:jagamata/pages/analisis_potensi/controllers/analisis_potensi_controller.dart';
+import 'package:jagamata/pages/riwayat_deteksi_mata/controllers/riwayat_deteksi_mata_controller.dart';
+
 // ==============================================================================
 // 1. DEKLARASI GLOBAL (PENTING: Harus di luar void main)
 // ==============================================================================
@@ -35,11 +46,11 @@ List<CameraDescription> cameras = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // ============================================================================
   // 2. INISIALISASI KAMERA (PENTING: Diisi sebelum aplikasi jalan)
   // ============================================================================
-  
+
   // Mendapatkan daftar kamera yang tersedia
   try {
     cameras = await availableCameras();
@@ -52,7 +63,11 @@ void main() async {
   if (savedToken != null) {
     ApiService.setToken(savedToken);
   }
-  
+  // Register controller
+  Get.put(AnalisisKelelahanController());
+  Get.put(AnalisisPotensiController());
+  Get.put(RiwayatDeteksiMataController());
+
   runApp(const JagaMata());
 }
 
@@ -61,7 +76,7 @@ class JagaMata extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
       routes: {
@@ -81,20 +96,29 @@ class JagaMata extends StatelessWidget {
         '/eyeExercise': (context) => Coba(),
         '/senammata': (context) => SenamMata(),
         '/senameyes': (context) => EyeExercisePage(),
-        '/obat' : (context) => Obat(),
-        '/artikelnew' : (context) => Artikelnew(),
-        '/isiartikel' : (context) => Isiartikel(),
+        '/obat': (context) => Obat(),
+        '/artikelnew': (context) => Artikelnew(),
+        '/isiartikel': (context) => Isiartikel(),
         '/complete-profile': (context) => CompleteProfilePage(),
         '/history_detection': (context) => HistoryDetectionPage(),
         '/search_results': (context) => SearchResultsPage(
           searchQuery: ModalRoute.of(context)!.settings.arguments as String,
         ),
-        
+
         // ======================================================================
         // 3. PEMANGGILAN ROUTE (Sekarang sudah tidak merah)
         // ======================================================================
         '/acupressure': (context) => AcupressurePage(cameras: cameras),
+
+        '/analisis-kelelahan': (context) => const AnalisisKelelahanView(),
+
+        '/analisis-potensi': (context) => const AnalisisPotensiView(),
+
+        '/riwayat-deteksi-mata': (context) => const RiwayatDeteksiMataView(),
       },
+
+      // B. Tambahkan baris ini di bawah properti routes untuk membaca dari Get CLI
+      getPages: AppPages.routes,
     );
   }
 }
@@ -114,15 +138,15 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   _navigateToNext() async {
-    await Future.delayed(const Duration(seconds: 3)); 
+    await Future.delayed(const Duration(seconds: 3));
     if (mounted) {
       // Mengarahkan ke Login (atau bisa diubah logicnya sesuai kebutuhan token)
-      Navigator.pushReplacementNamed(context, '/login'); 
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return const LoadingPage(); 
+    return const LoadingPage();
   }
 }

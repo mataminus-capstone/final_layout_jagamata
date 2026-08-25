@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:jagamata/app/routes/app_pages.dart';
 import 'camera_page.dart';
 import 'package:jagamata/services/image_picker.dart';
 import 'package:jagamata/services/api_service.dart';
@@ -36,7 +39,8 @@ class _DeteksiState extends State<Deteksi> {
           IconButton(
             icon: Icon(Icons.history, color: Color(0xFF4A77A1)),
             onPressed: () {
-              _showHistoryChoice(context);
+              DETEKSI();
+              // _showHistoryChoice(context);
             },
           ),
         ],
@@ -70,7 +74,8 @@ class _DeteksiState extends State<Deteksi> {
                 subtitle: "Katarak, Glaukoma, dll",
                 icon: Icons.health_and_safety_outlined,
                 color: Color(0xFF80AFCC),
-                onTap: () => _showImageSourceDialog(context, isDisease: true),
+                onTap: () => POTENSI(),
+                //  _showImageSourceDialog(context, isDisease: true),
               ),
 
               SizedBox(height: 20),
@@ -84,7 +89,8 @@ class _DeteksiState extends State<Deteksi> {
                 color: Color(
                   0xFFA2C38E,
                 ), // Greenish for variety or keep consistent
-                onTap: () => _showImageSourceDialog(context, isDisease: false),
+                onTap: () => ANALISIS(),
+                // _showImageSourceDialog(context, isDisease: false),
               ),
 
               SizedBox(height: 40),
@@ -202,7 +208,15 @@ class _DeteksiState extends State<Deteksi> {
       ),
     );
   }
-
+  void ANALISIS() {
+    Get.toNamed('/analisis-kelelahan');
+  }
+  void POTENSI() {
+    Get.toNamed('/analisis-potensi');
+  }
+  void DETEKSI() {
+    Get.toNamed(Routes.RIWAYAT_DETEKSI_MATA);
+  }
   void _showImageSourceDialog(BuildContext context, {required bool isDisease}) {
     // Capture the parent context BEFORE showing the bottom sheet
     // This context will remain valid after the bottom sheet is closed
