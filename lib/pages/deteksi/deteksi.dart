@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get.dart';
+
 import 'package:jagamata/app/routes/app_pages.dart';
+import 'package:jagamata/pages/deteksi/riwayat_deteksi.dart';
+import 'package:jagamata/pages/deteksi/riwayat_kelelahan.dart';
 import 'camera_page.dart';
 import 'package:jagamata/services/image_picker.dart';
 import 'package:jagamata/services/api_service.dart';
@@ -11,8 +13,6 @@ import 'package:jagamata/models/acupressure_model.dart';
 import 'package:jagamata/pages/treatment/acupressure_page.dart';
 import 'package:jagamata/main.dart' show cameras;
 import 'package:jagamata/utils/label_utils.dart';
-import 'riwayat_deteksi.dart';
-import 'riwayat_kelelahan.dart';
 
 class Deteksi extends StatefulWidget {
   const Deteksi({super.key});
@@ -37,10 +37,10 @@ class _DeteksiState extends State<Deteksi> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.history, color: Color(0xFF4A77A1)),
+            icon: const Icon(Icons.history, color: Color(0xFF4A77A1)),
+            tooltip: 'Riwayat Deteksi',
             onPressed: () {
-              DETEKSI();
-              // _showHistoryChoice(context);
+              Get.toNamed(Routes.RIWAYAT_DETEKSI_MATA);
             },
           ),
         ],
@@ -74,8 +74,7 @@ class _DeteksiState extends State<Deteksi> {
                 subtitle: "Katarak, Glaukoma, dll",
                 icon: Icons.health_and_safety_outlined,
                 color: Color(0xFF80AFCC),
-                onTap: () => POTENSI(),
-                //  _showImageSourceDialog(context, isDisease: true),
+                onTap: () => _showImageSourceDialog(context, isDisease: true),
               ),
 
               SizedBox(height: 20),
@@ -89,8 +88,7 @@ class _DeteksiState extends State<Deteksi> {
                 color: Color(
                   0xFFA2C38E,
                 ), // Greenish for variety or keep consistent
-                onTap: () => ANALISIS(),
-                // _showImageSourceDialog(context, isDisease: false),
+                onTap: () => _showImageSourceDialog(context, isDisease: false),
               ),
 
               SizedBox(height: 40),
@@ -165,58 +163,18 @@ class _DeteksiState extends State<Deteksi> {
     );
   }
 
-  void _showHistoryChoice(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Lihat Riwayat",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            ListTile(
-              leading: Icon(Icons.history, color: Colors.blue),
-              title: Text("Riwayat Deteksi Potensi Penyakit"),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RiwayatDeteksi()),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.timelapse, color: Colors.green),
-              title: Text("Riwayat Kelelahan"),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RiwayatKelelahan()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
   void ANALISIS() {
     Get.toNamed('/analisis-kelelahan');
   }
+
   void POTENSI() {
     Get.toNamed('/analisis-potensi');
   }
+
   void DETEKSI() {
     Get.toNamed(Routes.RIWAYAT_DETEKSI_MATA);
   }
+
   void _showImageSourceDialog(BuildContext context, {required bool isDisease}) {
     // Capture the parent context BEFORE showing the bottom sheet
     // This context will remain valid after the bottom sheet is closed
@@ -306,43 +264,131 @@ class _DeteksiState extends State<Deteksi> {
     XFile imageFile,
     bool isDisease,
   ) async {
-    // Check if widget is still mounted before showing dialog
     if (!mounted) return;
+
+    // ============================================================
+    // LOADING
+    // ============================================================
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => Center(child: CircularProgressIndicator()),
+      builder: (_) {
+        return const Center(child: CircularProgressIndicator());
+      },
     );
 
     Map<String, dynamic> result;
+
     try {
+      // ============================================================
+      // PANGGIL API
+      // ============================================================
+
       if (isDisease) {
         result = await ApiService.detectDisease(imageFile);
       } else {
         result = await ApiService.detectDrowsiness(imageFile);
       }
     } catch (e) {
-      result = {'success': false, 'message': 'Error: ${e.toString()}'};
+      result = {'success': false, 'message': 'Terjadi kesalahan: $e'};
     }
 
-    // Check if widget is still mounted before closing dialog
-    if (!mounted) return;
-    Navigator.pop(context); // Close loading
+    // ============================================================
+    // WIDGET SUDAH TIDAK AKTIF
+    // ============================================================
 
-    if (result['success']) {
-      final data = result['data'];
-      if (!mounted) return;
-      if (isDisease) {
-        _showResultDialog(context, data);
-      } else {
-        _showDrowsinessResultDialog(context, data);
-      }
-    } else {
-      if (!mounted) return;
+    if (!mounted) return;
+
+    // ============================================================
+    // TUTUP LOADING
+    // ============================================================
+
+    Navigator.of(context).pop();
+
+    // ============================================================
+    // CEK HASIL API
+    // ============================================================
+
+    if (result['success'] != true) {
+      final message = result['message']?.toString() ?? 'Gagal memproses gambar';
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? 'Gagal memproses gambar')),
+        SnackBar(content: Text(message), duration: const Duration(seconds: 4)),
       );
+
+      // PENTING:
+      // Jangan pindah ke halaman analisis kalau API gagal.
+      return;
+    }
+
+    // ============================================================
+    // AMBIL DATA HASIL
+    // ============================================================
+
+    final rawData = result['data'];
+
+    if (rawData == null || rawData is! Map) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hasil deteksi dari server tidak valid.'),
+          duration: Duration(seconds: 4),
+        ),
+      );
+
+      return;
+    }
+
+    final Map<String, dynamic> data = Map<String, dynamic>.from(rawData);
+
+    // ============================================================
+    // DEBUG
+    // ============================================================
+
+    debugPrint('========================================');
+    debugPrint('HASIL DETEKSI');
+    debugPrint('isDisease: $isDisease');
+    debugPrint('data: $data');
+    debugPrint('image_url: ${data['image_url']}');
+    debugPrint('label: ${data['label']}');
+    debugPrint('confidence: ${data['confidence']}');
+    debugPrint('========================================');
+
+    // ============================================================
+    // VALIDASI HASIL KELELAHAN
+    // ============================================================
+
+    if (!isDisease) {
+      final imageUrl = data['image_url'];
+      final label = data['label'];
+      final confidence = data['confidence'];
+
+      if (imageUrl == null ||
+          imageUrl.toString().trim().isEmpty ||
+          label == null ||
+          label.toString().trim().isEmpty ||
+          confidence == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hasil deteksi kelelahan tidak lengkap dari server.'),
+            duration: Duration(seconds: 4),
+          ),
+        );
+
+        return;
+      }
+    }
+
+    // ============================================================
+    // NAVIGASI
+    // ============================================================
+
+    if (isDisease) {
+      // Deteksi penyakit
+      Get.toNamed('/analisis-potensi', arguments: data);
+    } else {
+      // Deteksi kelelahan
+      Get.toNamed('/analisis-kelelahan', arguments: data);
     }
   }
 

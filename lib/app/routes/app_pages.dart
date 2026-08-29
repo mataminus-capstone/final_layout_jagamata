@@ -29,7 +29,7 @@ class AppPages {
     GetPage(
       name: _Paths.RIWAYAT_DETEKSI_MATA,
       page: () => const RiwayatDeteksiMataView(),
-  binding: RiwayatDeteksiMataBinding(),
+      binding: RiwayatDeteksiMataBinding(),
     ),
   ];
 }

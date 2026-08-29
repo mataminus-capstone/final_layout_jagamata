@@ -588,34 +588,61 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getDetectionHistory({
-    int page = 1,
-    int perPage = 20,
-  }) async {
-    try {
-      final response = await http
-          .get(
-            Uri.parse(
-              '$baseUrl/api/detection/history?page=$page&per_page=$perPage',
-            ),
-            headers: _getHeaders(authenticated: true),
-          )
-          .timeout(timeout);
+  int page = 1,
+  int perPage = 20,
+}) async {
+  try {
+    final url =
+        '$baseUrl/api/detection/history?page=$page&per_page=$perPage';
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return {'success': true, 'data': data['data']};
-      } else {
-        final data = jsonDecode(response.body);
-        return {
-          'success': false,
-          'message': data['message'] ?? 'Gagal memuat riwayat',
-        };
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Error: ${e.toString()}'};
+    print('');
+    print('========================================');
+    print('[API] GET DISEASE HISTORY');
+    print('[API] URL: $url');
+    print('[API] Token exists: ${token != null}');
+    print('========================================');
+
+    final response = await http
+        .get(
+          Uri.parse(url),
+          headers: _getHeaders(authenticated: true),
+        )
+        .timeout(timeout);
+
+    print('[API] Status: ${response.statusCode}');
+    print('[API] Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      print('[API] Decoded data: $data');
+      print('[API] data[data] type: ${data['data'].runtimeType}');
+
+      return {
+        'success': true,
+        'data': data['data'],
+      };
+    } else {
+      final data = jsonDecode(response.body);
+
+      print('[API] ERROR: ${data['message']}');
+
+      return {
+        'success': false,
+        'data': [],
+        'message': data['message'] ?? 'Gagal memuat riwayat',
+      };
     }
-  }
+  } catch (e) {
+    print('[API] Disease history exception: $e');
 
+    return {
+      'success': false,
+      'data': [],
+      'message': 'Error: ${e.toString()}',
+    };
+  }
+}
   static Future<Map<String, dynamic>> getMedicines({
     String? category,
     int page = 1,
@@ -721,29 +748,58 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getDrowsinessHistory() async {
-    try {
-      final response = await http
-          .get(
-            Uri.parse('$baseUrl/api/drowsiness-history'),
-            headers: _getHeaders(authenticated: true),
-          )
-          .timeout(timeout);
+  try {
+    final url = '$baseUrl/api/drowsiness-history';
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return {'success': true, 'data': data['data']};
-      } else {
-        final data = jsonDecode(response.body);
-        return {
-          'success': false,
-          'message': data['message'] ?? 'Gagal memuat riwayat kelelahan',
-        };
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Error: ${e.toString()}'};
+    print('');
+    print('========================================');
+    print('[API] GET DROWSINESS HISTORY');
+    print('[API] URL: $url');
+    print('[API] Token exists: ${token != null}');
+    print('========================================');
+
+    final response = await http
+        .get(
+          Uri.parse(url),
+          headers: _getHeaders(authenticated: true),
+        )
+        .timeout(timeout);
+
+    print('[API] Status: ${response.statusCode}');
+    print('[API] Body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      print('[API] Decoded data: $data');
+      print('[API] data[data] type: ${data['data'].runtimeType}');
+
+      return {
+        'success': true,
+        'data': data['data'],
+      };
+    } else {
+      final data = jsonDecode(response.body);
+
+      print('[API] ERROR: ${data['message']}');
+
+      return {
+        'success': false,
+        'data': [],
+        'message':
+            data['message'] ?? 'Gagal memuat riwayat kelelahan',
+      };
     }
-  }
+  } catch (e) {
+    print('[API] Drowsiness history exception: $e');
 
+    return {
+      'success': false,
+      'data': [],
+      'message': 'Error: ${e.toString()}',
+    };
+  }
+}
   static void logout() {
     clearToken();
   }

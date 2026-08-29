@@ -17,33 +17,55 @@ class RiwayatDeteksiMataView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(RiwayatDeteksiMataController());
+    final controller = Get.find<RiwayatDeteksiMataController>();
 
     return Scaffold(
       backgroundColor: background,
       body: SafeArea(
         child: Obx(
-          () => SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: [
-                _buildHeader(),
+          () {
+            if (controller.isLoading.value) {
+              return Column(
+                children: [
+                  _buildHeader(),
+                  _buildTabs(controller),
+                  const Expanded(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                ],
+              );
+            }
 
-                _buildTabs(controller),
+            return RefreshIndicator(
+              onRefresh: controller.refreshHistory,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                child: Column(
+                  children: [
+                    _buildHeader(),
 
-                if (controller.selectedTab.value == 0)
-                  _buildDiseaseHistory()
-                else
-                  _buildFatigueHistory(),
+                    _buildTabs(controller),
 
-                const SizedBox(height: 30),
-              ],
-            ),
-          ),
+                    if (controller.selectedTab.value == 0)
+                      _buildDiseaseHistory(controller)
+                    else
+                      _buildFatigueHistory(controller),
+
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
+
   // ============================================================
   // HEADER
   // ============================================================
@@ -52,8 +74,12 @@ class RiwayatDeteksiMataView extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: primaryBlue,
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-
+      padding: const EdgeInsets.fromLTRB(
+        20,
+        16,
+        20,
+        16,
+      ),
       child: Row(
         children: [
           GestureDetector(
@@ -88,13 +114,17 @@ class RiwayatDeteksiMataView extends StatelessWidget {
   // TABS
   // ============================================================
 
-  Widget _buildTabs(RiwayatDeteksiMataController controller) {
+  Widget _buildTabs(
+    RiwayatDeteksiMataController controller,
+  ) {
     final selected = controller.selectedTab.value;
 
     return Container(
       width: double.infinity,
       color: primaryBlue,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 14,
+      ),
       child: Row(
         children: [
           Expanded(
@@ -131,26 +161,30 @@ class RiwayatDeteksiMataView extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: onTap,
-
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 5),
-
+        padding: const EdgeInsets.symmetric(
+          vertical: 13,
+          horizontal: 5,
+        ),
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: selected ? Colors.white : Colors.transparent,
+              color: selected
+                  ? Colors.white
+                  : Colors.transparent,
               width: 2,
             ),
           ),
         ),
-
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
               size: 22,
-              color: selected ? Colors.white : Colors.white.withOpacity(0.55),
+              color: selected
+                  ? Colors.white
+                  : Colors.white.withOpacity(0.55),
             ),
 
             const SizedBox(width: 7),
@@ -161,14 +195,14 @@ class RiwayatDeteksiMataView extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-
                 style: TextStyle(
                   color: selected
                       ? Colors.white
                       : Colors.white.withOpacity(0.55),
-
                   fontSize: 15,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: selected
+                      ? FontWeight.w700
+                      : FontWeight.w500,
                 ),
               ),
             ),
@@ -182,7 +216,11 @@ class RiwayatDeteksiMataView extends StatelessWidget {
   // DISEASE HISTORY
   // ============================================================
 
-  Widget _buildDiseaseHistory() {
+  Widget _buildDiseaseHistory(
+    RiwayatDeteksiMataController controller,
+  ) {
+    final history = controller.diseaseHistory;
+
     return Column(
       children: [
         _buildInfoHeader(
@@ -194,33 +232,23 @@ class RiwayatDeteksiMataView extends StatelessWidget {
 
         const SizedBox(height: 18),
 
-        _buildDiseaseCard(
-          disease: 'Konjungtivitis',
-          confidence: '92.8%',
-          status: 'Perlu Perhatian',
-          isNormal: false,
-          time: '26-01-2026 | 07:16',
-        ),
-
-        const SizedBox(height: 14),
-
-        _buildDiseaseCard(
-          disease: 'Tidak Terdeteksi',
-          confidence: '92.8%',
-          status: 'Normal',
-          isNormal: true,
-          time: '26-01-2026 | 07:16',
-        ),
-
-        const SizedBox(height: 14),
-
-        _buildDiseaseCard(
-          disease: 'Tidak Terdeteksi',
-          confidence: '92.8%',
-          status: 'Normal',
-          isNormal: true,
-          time: '26-01-2026 | 07:16',
-        ),
+        if (history.isEmpty)
+          _buildEmptyState(
+            icon: Icons.history_rounded,
+            message: 'Belum ada riwayat deteksi penyakit mata.',
+          )
+        else
+          ...history.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(
+                bottom: 14,
+              ),
+              child: _buildDiseaseCard(
+                controller: controller,
+                data: item,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -229,7 +257,11 @@ class RiwayatDeteksiMataView extends StatelessWidget {
   // FATIGUE HISTORY
   // ============================================================
 
-  Widget _buildFatigueHistory() {
+  Widget _buildFatigueHistory(
+    RiwayatDeteksiMataController controller,
+  ) {
+    final history = controller.fatigueHistory;
+
     return Column(
       children: [
         _buildInfoHeader(
@@ -241,30 +273,23 @@ class RiwayatDeteksiMataView extends StatelessWidget {
 
         const SizedBox(height: 18),
 
-        _buildFatigueCard(
-          status: 'Kelelahan',
-          confidence: '94.5%',
-          time: '26-01-2026 | 07:16',
-          fatigue: true,
-        ),
-
-        const SizedBox(height: 14),
-
-        _buildFatigueCard(
-          status: 'Tidak Kelelahan',
-          confidence: '94.5%',
-          time: '26-01-2026 | 01:16',
-          fatigue: false,
-        ),
-
-        const SizedBox(height: 14),
-
-        _buildFatigueCard(
-          status: 'Tidak Kelelahan',
-          confidence: '94.5%',
-          time: '26-01-2026 | 01:16',
-          fatigue: false,
-        ),
+        if (history.isEmpty)
+          _buildEmptyState(
+            icon: Icons.history_rounded,
+            message: 'Belum ada riwayat kelelahan mata.',
+          )
+        else
+          ...history.map(
+            (item) => Padding(
+              padding: const EdgeInsets.only(
+                bottom: 14,
+              ),
+              child: _buildFatigueCard(
+                controller: controller,
+                data: item,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -281,36 +306,35 @@ class RiwayatDeteksiMataView extends StatelessWidget {
   }) {
     return Container(
       width: double.infinity,
-
       padding: const EdgeInsets.all(18),
-
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: disease
-              ? const [Color(0xFFDDF8FA), Color(0xFFBDEDF1)]
-              : const [Color(0xFFE5F7F3), Color(0xFFD5F0E8)],
+              ? const [
+                  Color(0xFFDDF8FA),
+                  Color(0xFFBDEDF1),
+                ]
+              : const [
+                  Color(0xFFE5F7F3),
+                  Color(0xFFD5F0E8),
+                ],
         ),
-
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(28),
           bottomRight: Radius.circular(28),
         ),
       ),
-
       child: Row(
         children: [
           Container(
             width: 46,
             height: 46,
-
             decoration: BoxDecoration(
               color: disease
                   ? const Color(0xFFC8ECEF)
                   : const Color(0xFFD0EBE7),
-
               shape: BoxShape.circle,
             ),
-
             child: Icon(
               icon,
               color: disease
@@ -324,14 +348,13 @@ class RiwayatDeteksiMataView extends StatelessWidget {
 
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -343,7 +366,10 @@ class RiwayatDeteksiMataView extends StatelessWidget {
 
                 Text(
                   description,
-                  style: const TextStyle(fontSize: 14, color: textSecondary),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -358,122 +384,125 @@ class RiwayatDeteksiMataView extends StatelessWidget {
   // ============================================================
 
   Widget _buildDiseaseCard({
-    required String disease,
-    required String confidence,
-    required String status,
-    required bool isNormal,
-    required String time,
+    required RiwayatDeteksiMataController controller,
+    required Map<String, dynamic> data,
   }) {
+    final disease = _stringValue(
+      data,
+      [
+        'diagnosis',
+        'disease',
+        'label',
+      ],
+      fallback: 'Tidak Diketahui',
+    );
+
+    final confidence = controller.parseConfidence(
+      data['confidence'],
+    );
+
+    final isNormal = _isNormalDisease(disease);
+
+    final status = isNormal
+        ? 'Normal'
+        : 'Perlu Perhatian';
+
     final color = isNormal ? green : red;
 
-    return Container(
-      width: double.infinity,
+    final time = _formatDate(
+      data['created_at'] ??
+          data['detected_at'] ??
+          data['timestamp'],
+    );
 
-      padding: const EdgeInsets.all(16),
+    final imageUrl = _stringValue(
+      data,
+      [
+        'image_url',
+        'image',
+      ],
+    );
 
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius: BorderRadius.circular(14),
-
-        border: Border.all(color: const Color(0xFFE5E5E5)),
-
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-
+    return _buildBaseCard(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
         children: [
+          // ======================================================
           // HEADER
-Row(
-  crossAxisAlignment: CrossAxisAlignment.center,
-  children: [
-    // ICON
-    Icon(
-      isNormal
-          ? Icons.check_circle_outline
-          : Icons.warning_amber_rounded,
-      size: 22,
-      color: isNormal
-          ? green
-          : const Color(0xFF66554D),
-    ),
+          // ======================================================
 
-    const SizedBox(width: 8),
+          Row(
+            crossAxisAlignment:
+                CrossAxisAlignment.center,
+            children: [
+              Icon(
+                isNormal
+                    ? Icons.check_circle_outline
+                    : Icons.warning_amber_rounded,
+                size: 22,
+                color: isNormal
+                    ? green
+                    : const Color(0xFF66554D),
+              ),
 
-    // JUDUL
-    Expanded(
-      child: Text(
-        'Potensi Penyakit',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: textDark,
-        ),
-      ),
-    ),
+              const SizedBox(width: 8),
 
-    const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Potensi Penyakit',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textDark,
+                  ),
+                ),
+              ),
 
-    // TANGGAL DI POJOK KANAN
-    Text(
-      time,
-      textAlign: TextAlign.right,
-      style: const TextStyle(
-        fontSize: 12,
-        color: textSecondary,
-      ),
-    ),
-  ],
-),
+              const SizedBox(width: 12),
+
+              Text(
+                time,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: textSecondary,
+                ),
+              ),
+            ],
+          ),
+
           const Divider(height: 24),
 
-          // CONTENT
+          // ======================================================
+          // BODY
+          // ======================================================
+
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
-              // IMAGE PLACEHOLDER
-              Container(
-                width: 90,
-                height: 90,
-
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0F3F5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-
-                child: Icon(
-                  Icons.remove_red_eye_rounded,
-                  size: 48,
-                  color: isNormal
-                      ? const Color(0xFF7B858C)
-                      : const Color(0xFF8A6B5C),
-                ),
+              _buildImage(
+                imageUrl: imageUrl,
+                icon: Icons.remove_red_eye_rounded,
+                iconColor: isNormal
+                    ? const Color(0xFF7B858C)
+                    : const Color(0xFF8A6B5C),
               ),
 
               const SizedBox(width: 14),
 
-              // DETAIL
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     Text(
                       disease,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -481,17 +510,7 @@ Row(
                       ),
                     ),
 
-                    const SizedBox(height: 7),
-
-                    Text(
-                      'Confidence $confidence',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: textSecondary,
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 9),
 
                     Row(
                       children: [
@@ -499,7 +518,6 @@ Row(
                           isNormal
                               ? Icons.check_circle_rounded
                               : Icons.warning_rounded,
-
                           size: 19,
                           color: color,
                         ),
@@ -511,9 +529,37 @@ Row(
                             status,
                             style: TextStyle(
                               fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                              fontWeight:
+                                  FontWeight.w600,
                               color: color,
                             ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // CONFIDENCE DI KANAN
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Confidence',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: textSecondary,
+                            ),
+                          ),
+                        ),
+
+                        Text(
+                          '${confidence.toStringAsFixed(1)}%',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight:
+                                FontWeight.w600,
+                            color: textDark,
                           ),
                         ),
                       ],
@@ -533,63 +579,83 @@ Row(
   // ============================================================
 
   Widget _buildFatigueCard({
-    required String status,
-    required String confidence,
-    required String time,
-    required bool fatigue,
+    required RiwayatDeteksiMataController controller,
+    required Map<String, dynamic> data,
   }) {
-    final color = fatigue ? const Color(0xFFB06C3C) : green;
+    final label = _stringValue(
+      data,
+      [
+        'label',
+        'status',
+        'result',
+        'prediction',
+      ],
+      fallback: 'Unknown',
+    );
 
-    final bgColor = fatigue ? const Color(0xFFFFEFE2) : const Color(0xFFE4F8F1);
+    final confidence = controller.parseConfidence(
+      data['confidence'],
+    );
 
-    return Container(
-      width: double.infinity,
+    final fatigue = _isFatigued(label);
 
-      padding: const EdgeInsets.all(16),
+    final status = fatigue
+        ? 'Kelelahan'
+        : 'Tidak Kelelahan';
 
-      decoration: BoxDecoration(
-        color: Colors.white,
+    final color = fatigue
+        ? const Color(0xFFB06C3C)
+        : green;
 
-        borderRadius: BorderRadius.circular(14),
+    final bgColor = fatigue
+        ? const Color(0xFFFFEFE2)
+        : const Color(0xFFE4F8F1);
 
-        border: Border.all(color: const Color(0xFFE5E5E5)),
+    final time = _formatDate(
+      data['created_at'] ??
+          data['detected_at'] ??
+          data['timestamp'],
+    );
 
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+    final imageUrl = _stringValue(
+      data,
+      [
+        'image_url',
+        'image',
+      ],
+    );
 
+    return _buildBaseCard(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
         children: [
+          // ======================================================
           // HEADER
-          // ===========================================================
+          // ======================================================
+
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment:
+                CrossAxisAlignment.center,
             children: [
-              // ICON
               Icon(
                 fatigue
                     ? Icons.warning_amber_rounded
                     : Icons.check_circle_outline,
                 size: 22,
-                color: fatigue ? const Color(0xFF66554D) : green,
+                color: fatigue
+                    ? const Color(0xFF66554D)
+                    : green,
               ),
 
               const SizedBox(width: 8),
 
-              // JUDUL
               Expanded(
                 child: Text(
                   'Deteksi Kelelahan',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: textDark,
@@ -599,73 +665,74 @@ Row(
 
               const SizedBox(width: 12),
 
-              // TANGGAL DI POJOK KANAN
               Text(
                 time,
                 textAlign: TextAlign.right,
-                style: const TextStyle(fontSize: 12, color: textSecondary),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: textSecondary,
+                ),
               ),
             ],
           ),
+
           const Divider(height: 24),
 
+          // ======================================================
           // BODY
+          // ======================================================
+
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 90,
-                height: 90,
-
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0F3F5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-
-                child: const Icon(
-                  Icons.person_rounded,
-                  size: 52,
-                  color: Color(0xFF89939B),
-                ),
+              _buildImage(
+                imageUrl: imageUrl,
+                icon: Icons.person_rounded,
+                iconColor:
+                    const Color(0xFF89939B),
               ),
 
               const SizedBox(width: 14),
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Status',
-                      style: TextStyle(fontSize: 14, color: textSecondary),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: textSecondary,
+                      ),
                     ),
 
                     const SizedBox(height: 6),
 
                     Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding:
+                          const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 6,
                       ),
-
                       decoration: BoxDecoration(
                         color: bgColor,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius:
+                            BorderRadius.circular(20),
                       ),
-
                       child: Text(
                         status,
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                          fontWeight:
+                              FontWeight.w600,
                           color: color,
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 9),
+                    const SizedBox(height: 10),
 
                     Row(
                       children: [
@@ -680,10 +747,11 @@ Row(
                         ),
 
                         Text(
-                          confidence,
+                          '${confidence.toStringAsFixed(1)}%',
                           style: const TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontWeight:
+                                FontWeight.w600,
                             color: textDark,
                           ),
                         ),
@@ -697,5 +765,212 @@ Row(
         ],
       ),
     );
+  }
+
+  // ============================================================
+  // BASE CARD
+  // ============================================================
+
+  Widget _buildBaseCard({
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(
+        horizontal: 16,
+      ),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFFE5E5E5),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  // ============================================================
+  // IMAGE
+  // ============================================================
+
+  Widget _buildImage({
+    required String imageUrl,
+    required IconData icon,
+    required Color iconColor,
+  }) {
+    if (imageUrl.isEmpty) {
+      return Container(
+        width: 90,
+        height: 90,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF0F3F5),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 48,
+          color: iconColor,
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Image.network(
+        imageUrl,
+        width: 90,
+        height: 90,
+        fit: BoxFit.cover,
+        errorBuilder: (
+          context,
+          error,
+          stackTrace,
+        ) {
+          return Container(
+            width: 90,
+            height: 90,
+            color: const Color(0xFFF0F3F5),
+            child: Icon(
+              icon,
+              size: 48,
+              color: iconColor,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ============================================================
+  // EMPTY STATE
+  // ============================================================
+
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String message,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(
+        horizontal: 16,
+      ),
+      padding: const EdgeInsets.symmetric(
+        vertical: 45,
+        horizontal: 25,
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            size: 48,
+            color: const Color(0xFF9AA4AC),
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14,
+              color: textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+
+  String _stringValue(
+    Map<String, dynamic> data,
+    List<String> keys, {
+    String fallback = '',
+  }) {
+    for (final key in keys) {
+      final value = data[key];
+
+      if (value != null &&
+          value.toString().trim().isNotEmpty) {
+        return value.toString().trim();
+      }
+    }
+
+    return fallback;
+  }
+
+  bool _isNormalDisease(String disease) {
+    final normalized = disease.toLowerCase();
+
+    return normalized.contains('tidak') ||
+        normalized.contains('normal') ||
+        normalized.contains('healthy') ||
+        normalized.contains('sehat') ||
+        normalized.contains('no disease') ||
+        normalized.contains('non');
+  }
+
+  bool _isFatigued(String label) {
+    final normalized = label.toLowerCase();
+
+    if (normalized.contains('non') ||
+        normalized.contains('not') ||
+        normalized.contains('tidak') ||
+        normalized.contains('awake') ||
+        normalized.contains('normal') ||
+        normalized.contains('segar') ||
+        normalized.contains('alert')) {
+      return false;
+    }
+
+    return normalized.contains('drowsy') ||
+        normalized.contains('fatigue') ||
+        normalized.contains('tired') ||
+        normalized.contains('kantuk') ||
+        normalized.contains('lelah') ||
+        normalized.contains('ngantuk');
+  }
+
+  String _formatDate(dynamic value) {
+    if (value == null ||
+        value.toString().trim().isEmpty) {
+      return '-';
+    }
+
+    try {
+      final date = DateTime.parse(
+        value.toString(),
+      ).toLocal();
+
+      final day =
+          date.day.toString().padLeft(2, '0');
+
+      final month =
+          date.month.toString().padLeft(2, '0');
+
+      final year = date.year.toString();
+
+      final hour =
+          date.hour.toString().padLeft(2, '0');
+
+      final minute =
+          date.minute.toString().padLeft(2, '0');
+
+      return '$day-$month-$year | $hour:$minute';
+    } catch (_) {
+      return value.toString();
+    }
   }
 }
