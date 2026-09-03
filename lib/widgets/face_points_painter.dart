@@ -25,7 +25,7 @@ class FacePointsPainter extends CustomPainter {
 
     final Face face = faces.first;
     final currentPoint = controller.currentPoint;
-    final isFatigued = controller.condition == EyeCondition.fatigued;
+    final isFatigued = controller.isFatigued;
 
     // Point color based on eye condition
     final Color pointColor = isFatigued ? kOrange : kTosca;

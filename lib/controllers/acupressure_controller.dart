@@ -26,11 +26,20 @@ class AcupressureController extends ChangeNotifier {
   bool get isActive => _isActive;
   bool get isFinished => _isFinished;
   EyeCondition get condition => _condition;
+  bool get isFatigued => _condition.isFatigued;
+  bool get withDizziness => _condition.withDizziness;
   TherapyConfig get config => _config;
   int get currentRepetition => _currentRepetition;
   int get totalPoints => _points.length;
   int get currentPointIndex => _currentIndex + 1;
   String get pressureLevel => _config.pressureLevel;
+
+  /// Durasi penekanan titik saat ini (pakai durasi khusus titik bila ada)
+  int get _currentPointDuration =>
+      currentPoint.duration ?? _config.durationPerPoint;
+
+  /// Durasi penekanan titik saat ini (publik, untuk UI progress)
+  int get currentPointDuration => _currentPointDuration;
 
   // Constructor - Initialize with default
   AcupressureController() {
@@ -48,7 +57,7 @@ class AcupressureController extends ChangeNotifier {
   void _initializeForCondition(EyeCondition condition) {
     _points = getAcupressurePointsByCondition(condition);
     _config = getTherapyConfigByCondition(condition);
-    _secondsLeft = _config.durationPerPoint;
+    _secondsLeft = _currentPointDuration;
   }
 
   void startSession() {
@@ -56,7 +65,7 @@ class AcupressureController extends ChangeNotifier {
     _currentRepetition = 1;
     _isFinished = false;
     _isActive = true;
-    _secondsLeft = _config.durationPerPoint;
+    _secondsLeft = _currentPointDuration;
     _audioService.playNextPointInstruction(currentPoint.instruction);
     _startTimer();
     notifyListeners();
@@ -87,14 +96,14 @@ class AcupressureController extends ChangeNotifier {
     _timer?.cancel();
     _currentIndex = 0;
     _currentRepetition = 1;
-    _secondsLeft = _config.durationPerPoint;
+    _secondsLeft = _currentPointDuration;
     _isActive = false;
     _isFinished = false;
     notifyListeners();
   }
 
   void _startTimer() {
-    _secondsLeft = _config.durationPerPoint;
+    _secondsLeft = _currentPointDuration;
     _timer?.cancel();
     notifyListeners();
 
@@ -147,9 +156,11 @@ class AcupressureController extends ChangeNotifier {
   /// Info summary untuk ditampilkan di hasil
   Map<String, dynamic> getSessionInfo() {
     return {
-      'condition': _condition == EyeCondition.fatigued
-          ? 'Indikasi Kelelahan'
-          : 'Mata Normal',
+      'condition': _condition == EyeCondition.normal
+          ? 'Mata Normal'
+          : _condition == EyeCondition.fatiguedWithDizziness
+              ? 'Kelelahan + Pusing'
+              : 'Kelelahan Tanpa Pusing',
       'totalPoints': _points.length,
       'durationPerPoint': _config.durationPerPoint,
       'repetitions': _config.repetitions,

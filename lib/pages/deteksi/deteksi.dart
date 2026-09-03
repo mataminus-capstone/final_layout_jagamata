@@ -826,7 +826,7 @@ class _DeteksiState extends State<Deteksi> {
                   SizedBox(height: 12),
                   Text(
                     isFatigued
-                        ? "Mata Anda menunjukkan indikasi kelelahan. Kami merekomendasikan terapi akupresur dengan 6 titik khusus untuk membantu merilekskan mata."
+                        ? "Mata Anda menunjukkan indikasi kelelahan. Kami merekomendasikan terapi akupresur dengan 5 titik khusus untuk membantu merilekskan mata."
                         : "Mata Anda menunjukkan kondisi baik! Anda dapat melakukan terapi akupresur maintenance untuk menjaga kesehatan mata.",
                     style: TextStyle(
                       color: Colors.grey[700],
@@ -842,7 +842,7 @@ class _DeteksiState extends State<Deteksi> {
                     children: [
                       _buildInfoBadge(
                         icon: Icons.touch_app,
-                        label: isFatigued ? "6 Titik/Sisi" : "4 Titik/Sisi",
+                        label: "5 Titik/Sisi",
                         color: isFatigued ? kOrange : kTosca,
                       ),
                       _buildInfoBadge(

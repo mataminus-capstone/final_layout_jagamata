@@ -270,14 +270,21 @@ class _TreatmentPageState extends State<TreatmentPage> {
     EyeCondition condition,
     String? lastDetectionInfo,
   ) {
-    final bool isFatigued = condition == EyeCondition.fatigued;
+    final bool isFatigued = condition.isFatigued;
+    bool hasDizziness = false;
 
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
-      builder: (ctx) => Container(
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          final EyeCondition finalCondition = hasDizziness
+              ? EyeCondition.fatiguedWithDizziness
+              : condition;
+          final bool isDizzinessMode = hasDizziness;
+          return Container(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -312,7 +319,11 @@ class _TreatmentPageState extends State<TreatmentPage> {
 
             // Title
             Text(
-              isFatigued ? "Mode Indikasi Lelah" : "Mode Terapi Maintenance",
+              !isFatigued
+                  ? "Mode Terapi Maintenance"
+                  : isDizzinessMode
+                  ? "Mode Kelelahan + Pusing"
+                  : "Mode Kelelahan Tanpa Pusing",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -348,9 +359,11 @@ class _TreatmentPageState extends State<TreatmentPage> {
 
             // Description
             Text(
-              isFatigued
-                  ? "Berdasarkan analisis terakhir, mata Anda menunjukkan indikasi kelelahan. Terapi akan menggunakan 6 titik akupresur dengan tekanan sedang-kuat."
-                  : "Berdasarkan analisis terakhir, mata Anda menunjukkan kondisi baik. Terapi akan menggunakan 4 titik akupresur dengan tekanan ringan untuk maintenance.",
+              !isFatigued
+                  ? "Berdasarkan analisis terakhir, mata Anda menunjukkan kondisi baik. Terapi akan menggunakan 5 titik akupresur dengan tekanan ringan untuk maintenance."
+                  : isDizzinessMode
+                  ? "Berdasarkan analisis terakhir, mata Anda menunjukkan indikasi kelelahan disertai sakit kepala/pusing. Terapi menggunakan 5 titik akupresur dengan fokus pada Titik 4 & 5 serta durasi ekstra +2 detik."
+                  : "Berdasarkan analisis terakhir, mata Anda menunjukkan indikasi kelelahan tanpa sakit kepala/pusing. Terapi menggunakan 5 titik akupresur dengan fokus pada Titik 1, 2, 3 (area alis) dan tekanan sedang-kuat.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
@@ -358,6 +371,43 @@ class _TreatmentPageState extends State<TreatmentPage> {
                 height: 1.5,
               ),
             ),
+            const SizedBox(height: 16),
+
+            // Checkbox sakit kepala/pusing (hanya tampil saat kelelahan)
+            if (isFatigued)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: kOrange.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: kOrange.withOpacity(0.25)),
+                ),
+                child: CheckboxListTile(
+                  value: hasDizziness,
+                  onChanged: (value) =>
+                      setSheetState(() => hasDizziness = value ?? false),
+                  activeColor: kOrange,
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: Text(
+                    "Apakah Anda juga mengalami sakit kepala/pusing?",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: kDarkBlue,
+                    ),
+                  ),
+                  subtitle: Text(
+                    "Jika ya, Titik 4 & 5 (Jingming & Tongziliao) akan dipijat dengan durasi ekstra +2 detik.",
+                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                  ),
+                ),
+              ),
+
             const SizedBox(height: 24),
 
             // Therapy info badges
@@ -368,12 +418,16 @@ class _TreatmentPageState extends State<TreatmentPage> {
               children: [
                 _buildInfoBadge(
                   icon: Icons.touch_app,
-                  label: isFatigued ? "6 Titik/Sisi" : "4 Titik/Sisi",
+                  label: "5 Titik/Sisi",
                   color: isFatigued ? kOrange : kTosca,
                 ),
                 _buildInfoBadge(
                   icon: Icons.timer,
-                  label: isFatigued ? "12 Detik/Titik" : "6 Detik/Titik",
+                  label: !isFatigued
+                      ? "6 Detik/Titik"
+                      : isDizzinessMode
+                      ? "14 Detik (Titik 4-5)"
+                      : "12 Detik/Titik",
                   color: isFatigued ? kOrange : kTosca,
                 ),
                 _buildInfoBadge(
@@ -418,7 +472,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
                         MaterialPageRoute(
                           builder: (_) => AcupressurePage(
                             cameras: cameras,
-                            eyeCondition: condition,
+                            eyeCondition: finalCondition,
                           ),
                         ),
                       );
@@ -443,7 +497,9 @@ class _TreatmentPageState extends State<TreatmentPage> {
               ],
             ),
           ],
-        ),
+          ),
+        );
+        },
       ),
     );
   }
@@ -583,12 +639,35 @@ class _TreatmentPageState extends State<TreatmentPage> {
             ),
             const SizedBox(height: 24),
 
-            // Fatigued option
+            // Fatigued + pusing option
             _buildModeOption(
               ctx,
-              title: "Indikasi Kelelahan",
+              title: "Kelelahan + Sakit Kepala/Pusing",
               description:
-                  "6 titik akupresur, 12 detik/titik, tekanan sedang-kuat",
+                  "5 titik akupresur, fokus Titik 4-5, durasi ekstra +2 detik",
+              icon: Icons.healing,
+              color: kOrange,
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AcupressurePage(
+                      cameras: cameras,
+                      eyeCondition: EyeCondition.fatiguedWithDizziness,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // Fatigued tanpa pusing option
+            _buildModeOption(
+              ctx,
+              title: "Kelelahan Tanpa Pusing",
+              description:
+                  "5 titik akupresur, fokus Titik 1-3 (alis), 12 detik/titik",
               icon: Icons.warning_amber_rounded,
               color: kOrange,
               onTap: () {
@@ -610,7 +689,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
             _buildModeOption(
               ctx,
               title: "Mata Normal (Maintenance)",
-              description: "4 titik akupresur, 6 detik/titik, tekanan ringan",
+              description: "5 titik akupresur, 6 detik/titik, tekanan ringan",
               icon: Icons.check_circle,
               color: kTosca,
               onTap: () {

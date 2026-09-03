@@ -188,8 +188,7 @@ class _AcupressurePageState extends State<AcupressurePage> {
                 AnimatedBuilder(
                   animation: _logicController,
                   builder: (context, _) {
-                    final isFatigued =
-                        _logicController.condition == EyeCondition.fatigued;
+                    final isFatigued = _logicController.isFatigued;
                     return Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -264,8 +263,23 @@ class _AcupressurePageState extends State<AcupressurePage> {
   }
 
   Widget _buildStartScreen() {
-    final isFatigued = _logicController.condition == EyeCondition.fatigued;
+    final isFatigued = _logicController.isFatigued;
     final config = _logicController.config;
+    final condition = _logicController.condition;
+
+    final String modeTitle;
+    final String focusLabel;
+    switch (condition) {
+      case EyeCondition.normal:
+        modeTitle = "Terapi Maintenance";
+        focusLabel = "Fokus seimbang pada semua titik (1-5)";
+      case EyeCondition.fatigued:
+        modeTitle = "Terapi Kelelahan Tanpa Pusing";
+        focusLabel = "Fokus prioritas: Titik 1, 2, 3 (area alis)";
+      case EyeCondition.fatiguedWithDizziness:
+        modeTitle = "Terapi Kelelahan + Pusing";
+        focusLabel = "Fokus prioritas: Titik 4 & 5 (+2 detik)";
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -293,9 +307,7 @@ class _AcupressurePageState extends State<AcupressurePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isFatigued
-                              ? "Terapi Indikasi Lelah"
-                              : "Terapi Maintenance",
+                          modeTitle,
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -311,6 +323,38 @@ class _AcupressurePageState extends State<AcupressurePage> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: isFatigued
+                      ? kOrange.withOpacity(0.15)
+                      : kTosca.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.ads_click,
+                      color: isFatigued ? kOrange : kTosca,
+                      size: 15,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      focusLabel,
+                      style: TextStyle(
+                        color: isFatigued ? kOrange : kTosca,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
               // Stats row
@@ -415,7 +459,7 @@ class _AcupressurePageState extends State<AcupressurePage> {
   }
 
   Widget _buildFinishScreen() {
-    final isFatigued = _logicController.condition == EyeCondition.fatigued;
+    final isFatigued = _logicController.isFatigued;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -491,9 +535,10 @@ class _AcupressurePageState extends State<AcupressurePage> {
   }
 
   Widget _buildActiveScreen() {
-    final isFatigued = _logicController.condition == EyeCondition.fatigued;
+    final isFatigued = _logicController.isFatigued;
     final config = _logicController.config;
-    final progress = _logicController.secondsLeft / config.durationPerPoint;
+    final progress =
+        _logicController.secondsLeft / _logicController.currentPointDuration;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -583,6 +628,35 @@ class _AcupressurePageState extends State<AcupressurePage> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  // Badge titik prioritas (Titik 1-3 / Titik 4-5 sesuai mode)
+                  if (_logicController.currentPoint.isPriority)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.25),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.amber.withOpacity(0.6)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.star, size: 12, color: Colors.amber),
+                          SizedBox(width: 4),
+                          Text(
+                            "Titik Prioritas",
+                            style: TextStyle(
+                              color: Colors.amber,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(

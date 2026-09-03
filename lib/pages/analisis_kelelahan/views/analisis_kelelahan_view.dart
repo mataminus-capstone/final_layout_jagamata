@@ -250,10 +250,14 @@ class AnalisisKelelahanView extends GetView<AnalisisKelelahanController> {
                             const SizedBox(height: 18),
 
                             // ==================================================
-                            // QUESTION
+                            // QUESTION (hanya tampil saat kelelahan)
                             // ==================================================
 
-                            _buildQuestionCard(),
+                            Obx(
+                              () => controller.isFatigued
+                                  ? _buildQuestionCard()
+                                  : const SizedBox.shrink(),
+                            ),
 
                             const SizedBox(height: 18),
 
@@ -626,7 +630,7 @@ class AnalisisKelelahanView extends GetView<AnalisisKelelahanController> {
                 Expanded(
                   child: _infoChip(
                     Icons.touch_app_outlined,
-                    fatigued ? '6 Titik / sisi' : '4 Titik / sisi',
+                    '5 Titik / sisi',
                   ),
                 ),
 
@@ -776,8 +780,8 @@ class AnalisisKelelahanView extends GetView<AnalisisKelelahanController> {
                   ),
                 ),
                 child: Text(
-                  controller.isPusing.value
-                      ? 'Mulai Terapi Khusus'
+                  controller.isFatigued && controller.isPusing.value
+                      ? 'Mulai Terapi Kelelahan + Pusing'
                       : 'Mulai Terapi',
                   textAlign: TextAlign.center,
                   style: const TextStyle(

@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:jagamata/main.dart' show cameras;
+import 'package:jagamata/models/acupressure_model.dart';
+import 'package:jagamata/pages/treatment/acupressure_page.dart';
 
 class AnalisisKelelahanController extends GetxController {
   // ============================================================
@@ -106,11 +109,23 @@ class AnalisisKelelahanController extends GetxController {
   // ============================================================
 
   void mulaiTerapi() {
-    if (isPusing.value) {
-      Get.toNamed('/terapi-khusus');
+    // Tentukan mode akupresur berdasarkan hasil deteksi:
+    // - Tidak lelah        -> Mode Normal
+    // - Lelah tanpa pusing -> Mode Kelelahan Tanpa Pusing
+    // - Lelah + pusing     -> Mode Kelelahan + Pusing
+    final EyeCondition condition;
+    if (!isFatigued) {
+      condition = EyeCondition.normal;
+    } else if (isPusing.value) {
+      condition = EyeCondition.fatiguedWithDizziness;
     } else {
-      Get.toNamed('/terapi');
+      condition = EyeCondition.fatigued;
     }
+
+    Get.to(() => AcupressurePage(
+          cameras: cameras,
+          eyeCondition: condition,
+        ));
   }
 
   // ============================================================
